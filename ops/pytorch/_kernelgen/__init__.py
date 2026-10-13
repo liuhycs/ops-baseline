@@ -40,6 +40,23 @@ def generate_tensor_input(shape, dtype, device):
     ).to(device)
 
 
+def repeat_interleave_repeats(shape, dtype, device):
+    """Replay workload-defining repeats independently of process/device RNG.
+
+    These two recipes have one variant per shape. Generate on CPU with a local
+    generator so CPU and CUDA reconstruction agree without changing global RNG.
+    Preserve the source's int64 repeats and uniform [0, 31) distribution.
+    """
+    if torch.device(device).type == "meta":
+        return torch.empty((shape[0],), dtype=torch.int64, device=device)
+    identity = json.dumps(["repeat_interleave_repeats_v1", list(shape), str(dtype)])
+    seed = int.from_bytes(hashlib.sha256(identity.encode()).digest()[:8], "big")
+    generator = torch.Generator(device="cpu").manual_seed(seed)
+    return torch.randint(
+        0, 31, (shape[0],), dtype=torch.int64, generator=generator
+    ).to(device)
+
+
 def unpack_inputs(value):
     """Upstream unpack_to_args_kwargs: the final dict contains keyword args."""
     if not isinstance(value, (tuple, list)):

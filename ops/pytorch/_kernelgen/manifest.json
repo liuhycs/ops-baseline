@@ -8175,7 +8175,8 @@
       "cases": 3,
       "dtypes": [
         "torch.int32"
-      ]
+      ],
+      "replay_policy": "repeats: local CPU generator seeded by SHA256 of repeat_interleave_repeats_v1, source shape and declared dtype; int64 uniform [0,31), copied to target device; independent of global RNG"
     },
     "repeat_interleave_tensor": {
       "source_file": "benchmark/test_repeat_interleave.py",
@@ -8188,7 +8189,8 @@
       "cases": 3,
       "dtypes": [
         "torch.int32"
-      ]
+      ],
+      "replay_policy": "repeats: local CPU generator seeded by SHA256 of repeat_interleave_repeats_v1, source shape and declared dtype; int64 uniform [0,31), copied to target device; independent of global RNG"
     },
     "replication_pad1d": {
       "source_file": "benchmark/test_replication_pad1d.py",

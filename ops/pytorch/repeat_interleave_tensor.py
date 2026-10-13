@@ -24,11 +24,11 @@ Comprehensive-only shapes are not imported.
 
 import torch
 
-from _kernelgen import export_contract
+from _kernelgen import export_contract, repeat_interleave_repeats
 
 
 def repeat_interleave_tensor_input_fn(shape, dtype, device):
-    repeats = torch.randint(low=0, high=31, size=[shape[0]], device=device)
+    repeats = repeat_interleave_repeats(shape, dtype, device)
     yield (repeats,)
 
 

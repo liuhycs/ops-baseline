@@ -5,6 +5,7 @@
 import importlib.util
 import json
 import random
+import subprocess
 from pathlib import Path
 import sys
 import unittest
@@ -14,7 +15,7 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 OPS = ROOT / "ops/pytorch"
 sys.path.insert(0, str(OPS))
-from _kernelgen import generate_tensor_input, unpack_inputs  # noqa: E402
+from _kernelgen import generate_tensor_input, unpack_inputs, repeat_interleave_repeats  # noqa: E402
 
 
 def describe(value):
@@ -38,6 +39,38 @@ def describe(value):
 
 
 class PytorchCatalogTests(unittest.TestCase):
+    def test_repeat_interleave_repeats_preserve_rng_and_source_contract(self):
+        for name in ("repeat_interleave_tensor", "repeat_interleave_self_tensor"):
+            for binding in self.modules[name].grid():
+                state = torch.random.get_rng_state()
+                repeats = repeat_interleave_repeats(binding["shape"], torch.int32, "cpu")
+                self.assertTrue(torch.equal(state, torch.random.get_rng_state()))
+                self.assertEqual(repeats.dtype, torch.int64)
+                self.assertEqual(list(repeats.shape), [binding["shape"][0]])
+                self.assertTrue(bool(((repeats >= 0) & (repeats < 31)).all()))
+
+    def test_repeat_interleave_workload_replays_across_processes(self):
+        script = '''
+import torch, sys, json, importlib
+sys.path.insert(0, sys.argv[1])
+torch.manual_seed(int(sys.argv[2]))
+result = {}
+for name in ("repeat_interleave_tensor", "repeat_interleave_self_tensor"):
+    module = importlib.import_module(name)
+    args, kwargs = module.build_inputs(module.grid()[0], module.DTYPES[0], "cpu")
+    repeats = args[0 if name == "repeat_interleave_tensor" else 1]
+    output = module.native()(*args, **kwargs)
+    result[name] = [repeats.tolist(), list(output.shape)]
+print(json.dumps(result))
+'''
+        outputs = [
+            json.loads(subprocess.check_output(
+                [sys.executable, "-c", script, str(OPS), str(seed)], text=True
+            ))
+            for seed in (123, 456)
+        ]
+        self.assertEqual(outputs[0], outputs[1])
+
     @classmethod
     def setUpClass(cls):
         cls.manifest = json.loads((OPS / "_kernelgen/manifest.json").read_text())
