@@ -22,3 +22,45 @@ PyTorch 官方算子（`torch.*` / `torch.nn.functional.*` / `torch.ops.aten.*`�
     python3 tools/collect_baseline_nvidia.py --repo pytorch [--ops ...] [--device N]
 
 缺省 `--repo vllm` 走 `ops/vllm`。
+
+## kernelgen-dev 扩充集合
+
+固定来源：[FlagGems kernelgen-dev `9d57a23b4386bd669152a935fe88a96db907da7c`](https://github.com/flagos-ai/FlagGems/tree/9d57a23b4386bd669152a935fe88a96db907da7c)。新增 766 个模块，加上原有 `silu` 共 767 个算子。来源涵盖 pointwise、reduction、BLAS、索引、归一化、池化、卷积、RNN、FFT、linalg、部分稀疏接口和明确的原生 backward API。
+
+- `_kernelgen/manifest.json` 逐算子记录原生表达式、benchmark 测试函数/行号、shape 来源、dtype 和采集点数量。
+- `_kernelgen/cases.json` 保存从源输入构造枚举出的描述符、调用变体和各 dtype 的输入元数据，不保存张量数据。
+- `_kernelgen/` 包提供输入/契约复用，不依赖 FlagGems 或 pytest，也不会被采集器当作算子扫描。
+- [PENDING.md](PENDING.md) 和 [coverage.json](coverage.json) 记录未纳入项、原因和待决定问题。
+
+### 输入和 shape 口径
+
+基础档位取源 `set_shapes` 的算子名 → 类 MRO → 默认值回退；显式默认描述符和输入函数里固定的几何同样沿用来源。固定几何只记录一次，使用真实首张量 shape 标识；没有把无效的 YAML 描述符重复附加到同一组输入。`COMPREHENSIVE` 额外 shape 不在本次范围，基础档位本身的调用变体全部保留。真实各位置参数/关键字参数的 shape、dtype、stride、标量配置保存在 JSON `config.inputs`。
+
+多个调用变体用 `caseN` 区分；嵌套描述符使用稳定的短哈希键，完整描述符仍保存在 config，避免 NCU 文件名超长。单一变体的普通 shape 使用既有列表主键形式。`native_api` 继续沿用公共采集器的 `ops.<module>` 约定，真实接口请看模块 docstring/manifest。
+
+少数源输入函数随机选择标量参数（padding、dim、steps、index）。这 7 个模块使用依赖算子/描述符/变体/dtype 的稳定 seed，使元数据、latency 与 NCU 重建参数一致；构造后恢复 Python 和 CPU RNG 状态，CUDA 张量数据仍按来源随机生成。共享 `generate_tensor_input` 的 bool 输入显式指定 bool dtype，以避免源 helper 默认生成 int64、却以 bool dtype 记录的问题。其余支持范围由源构造和本机实际 CUDA 验证决定；明确的 dtype 排除见 coverage.json。
+
+### 运行与验证
+
+建议先选择一个集合采集，例如：
+
+```bash
+python3 tools/collect_baseline_nvidia.py --repo pytorch \
+  --ops mm,addmm,bmm,index_select,layer_norm --device 0 \
+  --output pytorch_baseline.json --report-dir pytorch_ncu_reports
+```
+
+不传 `--ops` 将扫描整个集合。保留了来源中的大 shape，完整集合采集可能较长；已有 `--whitelist` / `--blacklist` / `--op-timeout` 仍可使用。
+
+```bash
+# CPU/meta 上验证所有新增描述符、dtype、变体、主键和 config 的一致性
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
+
+# CUDA 上：每个算子选择最小非空来源几何，检查该几何全部变体和 dtype；
+# 检查元数据、重复调用、位置输入不变及实际 CUDA kernel。
+# 限制只作用于验证探针，不会缩小正式采集 grid。
+python3 tools/validate_pytorch_ops.py --device 0 \
+  --max-input-elements 134217728 --output /tmp/pytorch_validation.json
+```
+
+旧的 `_smoke_ops.py` 用简化 torch stub，不能模拟本集合所有复杂输入；以真实 Torch 的契约测试和 CUDA 探针为准。CUDA 探针是小档位验证，并不声称所有大 shape 均完成 latency/NCU 采集；meta 无实现的数据依赖/低层接口另由 CUDA 探针验证。完整计时与 NCU 仍通过原采集器运行。

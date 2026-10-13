@@ -28,6 +28,7 @@ python tools/collect_baseline_nvidia.py --report-dir ncu_reports
 # 选择算子来源 repo：扫描 ops/<repo>/（缺省 vllm）
 python tools/collect_baseline_nvidia.py --repo vllm
 python tools/collect_baseline_nvidia.py --repo sglang
+python tools/collect_baseline_nvidia.py --repo pytorch --ops mm,layer_norm
 
 # 只跑指定的一到多个算子（逗号分隔）
 python tools/collect_baseline_nvidia.py --ops moe_sum,add_rms_norm
@@ -44,6 +45,8 @@ python tools/collect_baseline_nvidia.py --check --repo vllm
 依赖：CUDA GPU、`vllm`、`triton`、`ncu`(Nsight Compute)。采集器扫描 `ops/<repo>/`（由 `--repo` 选择，缺省 `vllm`），其余算子回落到 `baseline_shape.yaml`；两者同名时以算子模块为准。
 
 `--repo` 决定去 `ops/` 下哪个子目录找算子（`vllm` / `sglang` …），缺省 `vllm`。`--ops` / `--whitelist` / `--blacklist` 可组合使用：算子被保留需同时满足「在 `--ops` 内（若指定）」「在白名单内（若指定）」「不在黑名单内」。名单中的未知算子名会打印告警但不报错。
+
+PyTorch 算子集合来自固定版本的 FlagGems kernelgen-dev，覆盖范围、shape 口径、验证和待决定项见 [ops/pytorch/README.md](ops/pytorch/README.md)。
 
 ## 新增算子
 
