@@ -114,7 +114,7 @@ class PytorchCatalogTests(unittest.TestCase):
 
     def test_fixed_geometry_is_listed_once_per_source_case(self):
         for name, info in self.manifest["operators"].items():
-            if not info["shape_source"].startswith("fixed"):
+            if not info["shape_source"].startswith("fixed get_input_iter"):
                 continue
             module = self.modules[name]
             variants = [b["variant"] for b in module.grid()]
@@ -134,6 +134,121 @@ class PytorchCatalogTests(unittest.TestCase):
         boolean = generate_tensor_input((32,), torch.bool, "cpu")
         self.assertEqual(boolean.dtype, torch.bool)
         self.assertEqual(boolean.shape, (32,))
+
+    def test_custom_constructor_rejections_are_fully_classified(self):
+        coverage = json.loads((OPS / "coverage.json").read_text())
+        review = coverage["constructor_review"]
+        self.assertEqual(review["reviewed_records"], 78)
+        self.assertEqual(len(review["results"]), 78)
+        self.assertEqual(
+            review["implemented_records"] + review["remaining_records"], 78
+        )
+        for row in coverage["pending"]:
+            self.assertNotIn("custom __init__ needs manual adaptation", row["reason"])
+
+    def test_concat_and_stack_constructor_inputs_match_native(self):
+        for name in (
+            "concat",
+            "cat",
+            "stack",
+            "column_stack",
+            "row_stack",
+            "vstack",
+            "hstack",
+        ):
+            module = self.modules[name]
+            args, kwargs = module.build_inputs(
+                {"shape": [4, 8], "variant": 0}, torch.float32, "cpu"
+            )
+            self.assertEqual(len(args), 1)
+            self.assertEqual(len(args[0]), 3)
+            self.assertTrue(all(t.shape == (4, 8) for t in args[0]))
+            actual = module.native()(*args, **kwargs)
+            reference = getattr(torch, "cat" if name == "concat" else name)(
+                *args, **kwargs
+            )
+            torch.testing.assert_close(actual, reference)
+
+    def test_source_stack_memory_filters_are_preserved(self):
+        for name in ("cat", "column_stack", "row_stack", "stack", "_stack", "vstack"):
+            self.assertTrue(
+                all(
+                    __import__("math").prod(b["shape"]) <= 2**29
+                    for b in self.modules[name].grid()
+                )
+            )
+        self.assertEqual(
+            [b["shape"] for b in self.modules["concat"].grid()],
+            [[64, 64], [256, 256], [512, 512], [512, 1024], [512, 2048]],
+        )
+
+    def test_multi_margin_constructor_parameter_product_and_output_shapes(self):
+        for name in (
+            "multi_margin_loss",
+            "multi_margin_loss_out",
+            "multi_margin_loss_backward",
+            "multi_margin_loss_backward_out",
+        ):
+            module = self.modules[name]
+            seen = set()
+            for variant in range(12):
+                args, kwargs = module.build_inputs(
+                    {"shape": [3, 5], "variant": variant}, torch.float32, "cpu"
+                )
+                backward = "backward" in name
+                offset = 1 if backward else 0
+                seen.add(
+                    (args[offset + 2], args[offset + 4] is not None, args[offset + 5])
+                )
+                reduction = args[offset + 5]
+                expected = (3,) if reduction == 0 else ()
+                if backward:
+                    self.assertEqual(args[0].shape, expected)
+                if name.endswith("_out"):
+                    self.assertEqual(
+                        next(iter(kwargs.values())).shape,
+                        (3, 5) if backward else expected,
+                    )
+            self.assertEqual(len(seen), 12)
+
+    def test_paired_quantization_factory_uses_native_arguments_only(self):
+        module = self.modules["convert_weight_to_int4pack"]
+        for variant, inner_tiles in enumerate((2, 4, 8)):
+            args, kwargs = module.build_inputs(
+                {"shape": [16, 64], "variant": variant}, torch.uint8, "cpu"
+            )
+            self.assertEqual(len(args), 2)
+            self.assertIsInstance(args[0], torch.Tensor)
+            self.assertEqual(args[0].dtype, torch.uint8)
+            self.assertEqual(args[0].shape, (16, 64))
+            self.assertEqual(args[1], inner_tiles)
+
+    def test_parameterized_einsum_and_copy_source_dtype_are_not_lost(self):
+        module = self.modules["einsum"]
+        for variant, equation in enumerate(("ij,jk->ik", "bij,bjk->bik")):
+            args, kwargs = module.build_inputs(
+                {"shape": [2, 4, 5, 3], "variant": variant}, torch.float32, "cpu"
+            )
+            self.assertEqual(args[0], equation)
+            result = module.native()(*args, **kwargs)
+            self.assertEqual(result.shape, (4, 5) if variant == 0 else (2, 4, 5))
+        for source in (
+            "float32",
+            "float16",
+            "bfloat16",
+            "int8",
+            "int16",
+            "int32",
+            "int64",
+        ):
+            module = self.modules["to_copy_from_" + source]
+            for target in module.DTYPES:
+                args, kwargs = module.build_inputs(
+                    {"shape": [4, 8], "variant": 0}, target, "cpu"
+                )
+                self.assertEqual(args[0].dtype, getattr(torch, source))
+                self.assertEqual(kwargs["dtype"], target)
+                self.assertNotEqual(args[0].dtype, target)
 
     def test_unpack_matches_upstream_keyword_convention(self):
         value = torch.ones(2)

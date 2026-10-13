@@ -25,7 +25,7 @@ PyTorch 官方算子（`torch.*` / `torch.nn.functional.*` / `torch.ops.aten.*`�
 
 ## kernelgen-dev 扩充集合
 
-固定来源：[FlagGems kernelgen-dev `9d57a23b4386bd669152a935fe88a96db907da7c`](https://github.com/flagos-ai/FlagGems/tree/9d57a23b4386bd669152a935fe88a96db907da7c)。新增 766 个模块，加上原有 `silu` 共 767 个算子。来源涵盖 pointwise、reduction、BLAS、索引、归一化、池化、卷积、RNN、FFT、linalg、部分稀疏接口和明确的原生 backward API。
+固定来源：[FlagGems kernelgen-dev `9d57a23b4386bd669152a935fe88a96db907da7c`](https://github.com/flagos-ai/FlagGems/tree/9d57a23b4386bd669152a935fe88a96db907da7c)。新增 810 个模块，加上原有 `silu` 共 811 个算子。来源涵盖 pointwise、reduction、BLAS、索引、归一化、池化、卷积、RNN、FFT、linalg、部分稀疏接口和明确的原生 backward API。
 
 - `_kernelgen/manifest.json` 逐算子记录原生表达式、benchmark 测试函数/行号、shape 来源、dtype 和采集点数量。
 - `_kernelgen/cases.json` 保存从源输入构造枚举出的描述符、调用变体和各 dtype 的输入元数据，不保存张量数据。
@@ -64,3 +64,11 @@ python3 tools/validate_pytorch_ops.py --device 0 \
 ```
 
 旧的 `_smoke_ops.py` 用简化 torch stub，不能模拟本集合所有复杂输入；以真实 Torch 的契约测试和 CUDA 探针为准。CUDA 探针是小档位验证，并不声称所有大 shape 均完成 latency/NCU 采集；meta 无实现的数据依赖/低层接口另由 CUDA 探针验证。完整计时与 NCU 仍通过原采集器运行。
+
+### 自定义构造函数复查
+
+原清单中 78 条 `custom __init__ needs manual adaptation` 已全部复查：44 条来源记录完成适配，其余 34 条保留实际依赖/输入对象/计时边界/原生接口可用性原因，不再把自定义 `__init__` 本身当作阻塞。详细结果在 `coverage.json.constructor_review`。
+
+新增的 concat/cat/stack 家族保留来源 shape 和 `MAX_ELEMENTS` 过滤；einsum 保留矩阵与批矩阵两个方程；multi-margin-loss 家族保留 p、weighted、reduction 的全部 12 种组合及输出/梯度缓冲区形状。`convert_weight_to_int4pack` 只使用配对输入工厂中的 native 参数，与来源 `_run_metric` 相同。
+
+`to_copy` 的多个源 dtype 使用 `to_copy_from_float32` 等 7 个身份区分，DTYPES 仍表示实际目标 dtype，完整转换对沿用来源循环；`type_as` 沿用来源默认 shape 和不同 dtype 的配对。这些分组方式避免覆盖或误标多个同名构造函数的配置。

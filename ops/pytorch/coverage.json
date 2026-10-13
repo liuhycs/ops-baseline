@@ -9,21 +9,24 @@
     "named_benchmark_constructors": 1805,
     "unique_benchmark_names": 1694,
     "operator_config_ids": 1443,
-    "added_operators": 766,
+    "added_operators": 810,
     "existing_silu": 1,
-    "added_descriptors": 4623,
-    "pending_records": 1131,
+    "added_descriptors": 5161,
+    "pending_records": 1087,
     "pending_categories": {
-      "custom_input_or_state": 472,
-      "host_or_no_kernel": 95,
+      "custom_input_or_state": 394,
+      "host_or_no_kernel": 96,
       "meta_enumeration_unavailable": 20,
       "manual_input_review": 105,
-      "external_dependency": 45,
+      "external_dependency": 74,
       "variant_identity": 21,
       "fresh_input_timing": 261,
-      "native_cuda_unavailable": 4,
+      "native_cuda_unavailable": 5,
       "autograd_timing": 14,
+      "output_buffer_contract": 1,
+      "opaque_input_metadata": 1,
       "invalid_upstream_input": 1,
+      "timing_boundary": 1,
       "missing_benchmark_geometry": 93
     }
   },
@@ -45,15 +48,6 @@
     }
   },
   "pending": [
-    {
-      "op": "concat",
-      "source_file": "benchmark/test_Concat.py",
-      "source_test": "test_Concat",
-      "line": 67,
-      "native": "torch.cat",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
     {
       "op": "chunk_gated_delta_rule_fwd",
       "source_file": "benchmark/test_FLA/test_chunk_gated_delta_rule_fwd.py",
@@ -1500,8 +1494,8 @@
       "source_test": "test_apply_repetition_penalties",
       "line": 75,
       "native": "vllm_ops.apply_repetition_penalties",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression vllm_ops.apply_repetition_penalties resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "apply_rotary_pos_emb",
@@ -1576,15 +1570,6 @@
       "category": "fresh_input_timing"
     },
     {
-      "op": "argsort",
-      "source_file": "benchmark/test_argsort.py",
-      "source_test": "test_argsort",
-      "line": 203,
-      "native": "torch.argsort",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "as_strided",
       "source_file": "benchmark/test_as_strided.py",
       "source_test": "test_as_strided",
@@ -1637,15 +1622,6 @@
       "native": "lambda a: a.asinh_()",
       "reason": "inplace replay needs a fresh-input timer",
       "category": "fresh_input_timing"
-    },
-    {
-      "op": "assert_async",
-      "source_file": "benchmark/test_assert_async.py",
-      "source_test": "test_assert_async",
-      "line": 56,
-      "native": "torch._assert_async",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
     },
     {
       "op": "atan_",
@@ -2161,15 +2137,6 @@
       "category": "manual_input_review"
     },
     {
-      "op": "cat",
-      "source_file": "benchmark/test_cat.py",
-      "source_test": "test_cat",
-      "line": 65,
-      "native": "torch.cat",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "cat_out",
       "source_file": "benchmark/test_cat.py",
       "source_test": "test_cat_out",
@@ -2395,24 +2362,6 @@
       "category": "manual_input_review"
     },
     {
-      "op": "column_stack",
-      "source_file": "benchmark/test_column_stack.py",
-      "source_test": "test_column_stack",
-      "line": 59,
-      "native": "torch.column_stack",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "column_stack_out",
-      "source_file": "benchmark/test_column_stack.py",
-      "source_test": "test_column_stack_out",
-      "line": 80,
-      "native": "torch.column_stack",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "compute_linear_combination",
       "source_file": "benchmark/test_compute_linear_combination.py",
       "source_test": "test_compute_linear_combination",
@@ -2449,33 +2398,6 @@
       "category": "host_or_no_kernel"
     },
     {
-      "op": "conj_physical",
-      "source_file": "benchmark/test_conj_physical.py",
-      "source_test": "test_conj_physical",
-      "line": 91,
-      "native": "torch.conj_physical",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "_conj_physical",
-      "source_file": "benchmark/test_conj_physical.py",
-      "source_test": "test__conj_physical",
-      "line": 106,
-      "native": "torch.ops.aten._conj_physical",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "_conj_physical_out",
-      "source_file": "benchmark/test_conj_physical.py",
-      "source_test": "test__conj_physical_out",
-      "line": 124,
-      "native": "torch.ops.aten._conj_physical.out",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "conj_physical_",
       "source_file": "benchmark/test_conj_physical_.py",
       "source_test": "test_conj_physical_",
@@ -2500,15 +2422,6 @@
       "line": 126,
       "native": "torch.nn.functional.conv3d",
       "reason": "unresolved dependency: self",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "convert_weight_to_int4pack",
-      "source_file": "benchmark/test_convert_weight_to_int4pack.py",
-      "source_test": "test_convert_weight_to_int4pack",
-      "line": 134,
-      "native": "torch._convert_weight_to_int4pack",
-      "reason": "custom __init__ needs manual adaptation",
       "category": "custom_input_or_state"
     },
     {
@@ -3022,24 +2935,6 @@
       "line": 55,
       "native": "torch.ops.aten._dyn_quant_pack_4bit_weight.default",
       "reason": "NotImplementedError: Could not run 'aten::_dyn_quant_pack_4bit_weight' with arguments from the 'CUDA' backend. This could be because the operator doesn't exist for this backend, or was omitted during the selective/custom build process (if using custom build). If you are a Facebook employee using PyTorch on mobile, please visit https://fburl.com/ptmfixes for possible resolutions. 'aten::_dyn_quant_pack_4bit_weight' is only available for these backends: [CPU, Meta, BackendSelect, Python, FuncTorchDynamicLayerBackMode,",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "einsum",
-      "source_file": "benchmark/test_einsum.py",
-      "source_test": "test_einsum_matmul",
-      "line": 92,
-      "native": "lambda A, B: torch.einsum('ij,jk->ik', A, B)",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "einsum",
-      "source_file": "benchmark/test_einsum.py",
-      "source_test": "test_einsum_bmm",
-      "line": 103,
-      "native": "lambda A, B: torch.einsum('bij,bjk->bik', A, B)",
-      "reason": "custom __init__ needs manual adaptation",
       "category": "custom_input_or_state"
     },
     {
@@ -3759,8 +3654,8 @@
       "source_test": "test_perf_fp8_einsum_gems_vs_deepgemm",
       "line": 193,
       "native": "_deepgemm_fp8_einsum_wrapper",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "The source reference calls DeepGEMM with FP8 block scaling and its JIT/runtime dependencies. Constructor block_shape is known, but this is not a standalone PyTorch callable.",
+      "category": "external_dependency"
     },
     {
       "op": "fp8_fp4_mega_moe",
@@ -3903,8 +3798,8 @@
       "source_test": "test_fused_marlin_moe_w4a16_int4",
       "line": 292,
       "native": "_vllm_baseline",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _vllm_baseline resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "fused_marlin_moe_w4a16_mxfp4",
@@ -3912,8 +3807,8 @@
       "source_test": "test_fused_marlin_moe_w4a16_mxfp4",
       "line": 276,
       "native": "_vllm_baseline_mxfp4",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _vllm_baseline_mxfp4 resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "fused_marlin_moe_w8a16_int8",
@@ -3921,8 +3816,8 @@
       "source_test": "test_fused_marlin_moe_w8a16_int8",
       "line": 250,
       "native": "_vllm_baseline_int8",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _vllm_baseline_int8 resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "fused_experts_impl",
@@ -3930,8 +3825,8 @@
       "source_test": "test_fused_moe_impl_gems_vs_vllm",
       "line": 265,
       "native": "_vllm_fused_moe_wrapper",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _vllm_fused_moe_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "dispatch_fused_moe_kernel",
@@ -3939,8 +3834,8 @@
       "source_test": "test_dispatch_fused_moe_kernel",
       "line": 282,
       "native": "_torch_dispatch_fused_moe_kernel_wrapper",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "The composite Torch reference writes C via C.copy_(), where C is a positional argument; input preparation also uses FlagGems MoE metadata helpers. Need explicit output-buffer annotation and dependency separation before using the shared readonly-positional-input validation/timing contract.",
+      "category": "output_buffer_contract"
     },
     {
       "op": "fused_experts_impl",
@@ -3948,8 +3843,8 @@
       "source_test": "test_fused_moe_fp8",
       "line": 192,
       "native": "_vllm_fused_moe_fp8_wrapper",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _vllm_fused_moe_fp8_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "fused_experts_impl",
@@ -3957,8 +3852,8 @@
       "source_test": "test_fused_moe_fp8_blockwise",
       "line": 205,
       "native": "_vllm_fused_moe_fp8_blockwise_wrapper",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _vllm_fused_moe_fp8_blockwise_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "fused_experts_impl",
@@ -3966,8 +3861,8 @@
       "source_test": "test_fused_moe_int4_w4a16",
       "line": 204,
       "native": "_vllm_fused_moe_int4_w4a16_wrapper",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _vllm_fused_moe_int4_w4a16_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "fused_experts_impl",
@@ -3975,8 +3870,8 @@
       "source_test": "test_fused_experts_impl_int8",
       "line": 184,
       "native": "_vllm_fused_moe_int8_wrapper",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _vllm_fused_moe_int8_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "fused_experts_impl",
@@ -3984,8 +3879,8 @@
       "source_test": "test_fused_experts_impl_int8_w8a16",
       "line": 190,
       "native": "_vllm_fused_moe_int8_w8a16_wrapper",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _vllm_fused_moe_int8_w8a16_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "fused_moe",
@@ -3993,8 +3888,8 @@
       "source_test": "test_fused_moe_w8a16_mxq",
       "line": 305,
       "native": "_baseline_w8a16_mxq_wrapper",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _baseline_w8a16_mxq_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "fused_moe",
@@ -4002,8 +3897,8 @@
       "source_test": "test_fused_moe_w8a16_mxq_gems_vs_vllm",
       "line": 321,
       "native": "_baseline_w8a16_mxq_wrapper_vllm",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _baseline_w8a16_mxq_wrapper_vllm resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "fused_moving_avg_obs_fake_quant",
@@ -4164,8 +4059,8 @@
       "source_test": "test_get_paged_mqa_logits_metadata",
       "line": 89,
       "native": "get_paged_mqa_logits_metadata",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression get_paged_mqa_logits_metadata resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "get_scheduler_metadata",
@@ -4213,30 +4108,12 @@
       "category": "fresh_input_timing"
     },
     {
-      "op": "grid_sample",
-      "source_file": "benchmark/test_grid_sample.py",
-      "source_test": "test_grid_sample",
-      "line": 208,
-      "native": "torch.nn.functional.grid_sample",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "grid_sampler",
       "source_file": "benchmark/test_grid_sampler.py",
       "source_test": "test_grid_sampler",
       "line": 99,
       "native": "torch.ops.aten.grid_sampler",
       "reason": "unresolved dependency: rows",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "grid_sampler_3d_backward",
-      "source_file": "benchmark/test_grid_sampler_3d_backward.py",
-      "source_test": "test_grid_sampler_3d_backward",
-      "line": 53,
-      "native": "torch.ops.aten.grid_sampler_3d_backward.default",
-      "reason": "custom __init__ needs manual adaptation",
       "category": "custom_input_or_state"
     },
     {
@@ -4263,8 +4140,8 @@
       "source_test": "test_grouped_topk_no_renorm",
       "line": 105,
       "native": "vllm_grouped_topk",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression vllm_grouped_topk resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "grouped_topk",
@@ -4272,8 +4149,8 @@
       "source_test": "test_grouped_topk_score_0",
       "line": 134,
       "native": "vllm_grouped_topk",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression vllm_grouped_topk resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "grouped_topk",
@@ -4281,8 +4158,8 @@
       "source_test": "test_grouped_topk_score_1",
       "line": 163,
       "native": "vllm_grouped_topk",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression vllm_grouped_topk resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "gt_scalar_",
@@ -4474,15 +4351,6 @@
       "category": "custom_input_or_state"
     },
     {
-      "op": "hstack",
-      "source_file": "benchmark/test_hstack.py",
-      "source_test": "test_hstack",
-      "line": 50,
-      "native": "torch.hstack",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "hypot_",
       "source_file": "benchmark/test_hypot_.py",
       "source_test": "test_hypot_",
@@ -4562,15 +4430,6 @@
       "native": "lambda a, b: a.__ilshift__(b)",
       "reason": "inplace replay needs a fresh-input timer",
       "category": "fresh_input_timing"
-    },
-    {
-      "op": "im2col",
-      "source_file": "benchmark/test_im2col.py",
-      "source_test": "test_im2col",
-      "line": 48,
-      "native": "torch.ops.aten.im2col",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
     },
     {
       "op": "index",
@@ -4695,8 +4554,8 @@
       "source_test": "test_inplace_fused_experts_gems_vs_vllm",
       "line": 126,
       "native": "_vllm_inplace_fused_experts_wrapper",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _vllm_inplace_fused_experts_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "int_repr",
@@ -5100,8 +4959,8 @@
       "source_test": "test_linalg__powsum",
       "line": 44,
       "native": "torch.ops.aten.linalg__powsum.default",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Constructor ord=[1,2,3] and CORE_SHAPES are explicit, but torch.ops.aten.linalg__powsum.default is not exported by this machine's Torch 2.8 build. No substitute API was invented.",
+      "category": "native_cuda_unavailable"
     },
     {
       "op": "linalg_cholesky_ex",
@@ -5147,15 +5006,6 @@
       "native": "torch.ops.aten.linalg_inv",
       "reason": "'list' object has no attribute '_attributes'",
       "category": "manual_input_review"
-    },
-    {
-      "op": "linalg_ldl_factor",
-      "source_file": "benchmark/test_linalg_ldl_factor.py",
-      "source_test": "test_linalg_ldl_factor",
-      "line": 53,
-      "native": "torch.linalg.ldl_factor",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
     },
     {
       "op": "linalg_lstsq",
@@ -5712,8 +5562,8 @@
       "source_test": "test_mhc_pre",
       "line": 144,
       "native": "mhc_pre_ref",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "The source Torch reference and/or input preparation imports flag_gems.fused.mhc helpers (including sinkhorn_forward for mhc_bwd). Constructor constants are known; vendoring/verifying the transitive reference is a separate dependency adaptation.",
+      "category": "external_dependency"
     },
     {
       "op": "hc_split_sinkhorn_forward",
@@ -5721,8 +5571,8 @@
       "source_test": "test_hc_split_sinkhorn_forward",
       "line": 193,
       "native": "mhc_split_sinkhorn_torch_ref",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "The source Torch reference and/or input preparation imports flag_gems.fused.mhc helpers (including sinkhorn_forward for mhc_bwd). Constructor constants are known; vendoring/verifying the transitive reference is a separate dependency adaptation.",
+      "category": "external_dependency"
     },
     {
       "op": "mhc_bwd",
@@ -5730,8 +5580,8 @@
       "source_test": "test_mhc_bwd",
       "line": 238,
       "native": "mhc_bwd_ref",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "The source Torch reference and/or input preparation imports flag_gems.fused.mhc helpers (including sinkhorn_forward for mhc_bwd). Constructor constants are known; vendoring/verifying the transitive reference is a separate dependency adaptation.",
+      "category": "external_dependency"
     },
     {
       "op": "hc_head_fused_kernel",
@@ -5768,15 +5618,6 @@
       "native": "torch.ops.aten.mish_",
       "reason": "inplace replay needs a fresh-input timer",
       "category": "fresh_input_timing"
-    },
-    {
-      "op": "mixed_dtypes_linear",
-      "source_file": "benchmark/test_mixed_dtypes_linear.py",
-      "source_test": "test_mixed_dtypes_linear",
-      "line": 128,
-      "native": "mixed_dtypes_linear_torch",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
     },
     {
       "op": "mkldnn_adaptive_avg_pool2d",
@@ -5984,42 +5825,6 @@
       "native": "lambda a, b: a.mul_(b)",
       "reason": "inplace replay needs a fresh-input timer",
       "category": "fresh_input_timing"
-    },
-    {
-      "op": "multi_margin_loss",
-      "source_file": "benchmark/test_multi_margin_loss.py",
-      "source_test": "test_multi_margin_loss",
-      "line": 114,
-      "native": "torch.ops.aten.multi_margin_loss",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "multi_margin_loss_out",
-      "source_file": "benchmark/test_multi_margin_loss.py",
-      "source_test": "test_multi_margin_loss_out",
-      "line": 132,
-      "native": "torch.ops.aten.multi_margin_loss.out",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "multi_margin_loss_backward",
-      "source_file": "benchmark/test_multi_margin_loss.py",
-      "source_test": "test_multi_margin_loss_backward",
-      "line": 150,
-      "native": "torch.ops.aten.multi_margin_loss_backward",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "multi_margin_loss_backward_out",
-      "source_file": "benchmark/test_multi_margin_loss.py",
-      "source_test": "test_multi_margin_loss_backward_out",
-      "line": 168,
-      "native": "torch.ops.aten.multi_margin_loss_backward.grad_input",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
     },
     {
       "op": "multilabel_margin_loss_forward",
@@ -6414,8 +6219,8 @@
       "source_test": "test_outplace_fused_experts_gems_vs_vllm",
       "line": 113,
       "native": "_vllm_outplace_fused_experts_wrapper",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression _vllm_outplace_fused_experts_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "output_nr",
@@ -6432,8 +6237,8 @@
       "source_test": "test_pack_seq",
       "line": 131,
       "native": "vllm_pack_seq",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression vllm_pack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "pack_seq_triton",
@@ -6441,8 +6246,8 @@
       "source_test": "test_pack_seq_fp8",
       "line": 175,
       "native": "vllm_pack_seq",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression vllm_pack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "pack_seq_triton",
@@ -6450,8 +6255,8 @@
       "source_test": "test_pack_seq_int8",
       "line": 190,
       "native": "vllm_pack_seq",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression vllm_pack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "padded_dense_to_jagged_forward",
@@ -6756,8 +6561,8 @@
       "source_test": "test_quantized_gru",
       "line": 120,
       "native": "torch_gru_baseline",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "The source factory creates packed quantized parameter ScriptObject inputs. Current config/NCU reconstruction supports tensors/scalars, not a serializable packed ScriptObject contract; removing the harmless constructor does not resolve this.",
+      "category": "opaque_input_metadata"
     },
     {
       "op": "quantized_lstm",
@@ -7129,15 +6934,6 @@
       "category": "fresh_input_timing"
     },
     {
-      "op": "router_gemm",
-      "source_file": "benchmark/test_router_gemm.py",
-      "source_test": "test_perf_router_gemm",
-      "line": 87,
-      "native": "torch_router_gemm",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "row_indices",
       "source_file": "benchmark/test_row_indices.py",
       "source_test": "test_row_indices",
@@ -7162,24 +6958,6 @@
       "line": 97,
       "native": "torch.row_indices_copy",
       "reason": "unresolved dependency: in_dtype",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "row_stack",
-      "source_file": "benchmark/test_row_stack.py",
-      "source_test": "test_row_stack",
-      "line": 70,
-      "native": "torch.row_stack",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "row_stack_out",
-      "source_file": "benchmark/test_row_stack.py",
-      "source_test": "test_row_stack_out",
-      "line": 96,
-      "native": "torch.row_stack",
-      "reason": "custom __init__ needs manual adaptation",
       "category": "custom_input_or_state"
     },
     {
@@ -7777,24 +7555,6 @@
       "category": "meta_enumeration_unavailable"
     },
     {
-      "op": "sparse_semi_structured_linear",
-      "source_file": "benchmark/test_sparse_semi_structured_linear.py",
-      "source_test": "test_sparse_semi_structured_linear",
-      "line": 99,
-      "native": "_torch_ref",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "sparse_semi_structured_linear",
-      "source_file": "benchmark/test_sparse_semi_structured_linear.py",
-      "source_test": "test_sparse_semi_structured_linear_with_bias",
-      "line": 110,
-      "native": "_torch_ref_with_bias",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "sparse_semi_structured_mm",
       "source_file": "benchmark/test_sparse_semi_structured_mm.py",
       "source_test": "test_sparse_semi_structured_mm",
@@ -8016,8 +7776,8 @@
       "source_test": "test_split",
       "line": 151,
       "native": "torch.ops.aten.split",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source split.Tensor/sizes returns tensor views and split.str is a host string operation. These do not launch CUDA compute kernels; covering them requires a host/metadata timing policy, not constructor adaptation.",
+      "category": "host_or_no_kernel"
     },
     {
       "op": "split_copy",
@@ -8116,24 +7876,6 @@
       "line": 110,
       "native": "_torch_sspaddmm",
       "reason": "aten::_to_sparse: attempted to run this operator with Meta tensors, but there was no fake impl or Meta kernel registered. You may have run into this message while using an operator with PT2 compilation APIs (torch.compile/torch.export); in order to use this operator with those APIs you'll need to add a fake impl. Please see the following for next steps:  https://pytorch.org/tutorials/advanced/custom_ops_landing_page.html",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "stack",
-      "source_file": "benchmark/test_stack.py",
-      "source_test": "test_stack",
-      "line": 63,
-      "native": "torch.stack",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "_stack",
-      "source_file": "benchmark/test_stack.py",
-      "source_test": "test__stack",
-      "line": 77,
-      "native": "torch._stack",
-      "reason": "custom __init__ needs manual adaptation",
       "category": "custom_input_or_state"
     },
     {
@@ -8416,51 +8158,6 @@
       "category": "fresh_input_timing"
     },
     {
-      "op": "to_copy",
-      "source_file": "benchmark/test_to_copy.py",
-      "source_test": "test_to_copy",
-      "line": 98,
-      "native": "torch.ops.aten._to_copy",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "to_copy",
-      "source_file": "benchmark/test_to_copy.py",
-      "source_test": "test_to_copy",
-      "line": 108,
-      "native": "torch.ops.aten._to_copy",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "to_copy",
-      "source_file": "benchmark/test_to_copy.py",
-      "source_test": "test_to_copy",
-      "line": 118,
-      "native": "torch.ops.aten._to_copy",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "to_copy",
-      "source_file": "benchmark/test_to_copy.py",
-      "source_test": "test_to_copy",
-      "line": 128,
-      "native": "torch.ops.aten._to_copy",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "to_copy",
-      "source_file": "benchmark/test_to_copy.py",
-      "source_test": "test_to_copy",
-      "line": 140,
-      "native": "torch.ops.aten._to_copy",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "to_dense",
       "source_file": "benchmark/test_to_dense.py",
       "source_test": "test_to_dense",
@@ -8594,15 +8291,6 @@
       "native": "torch.ops.aten.trace_backward",
       "reason": "source factory yields no inputs",
       "category": "manual_input_review"
-    },
-    {
-      "op": "transform_bias_rescale_qkv",
-      "source_file": "benchmark/test_transform_bias_rescale_qkv.py",
-      "source_test": "test__transform_bias_rescale_qkv",
-      "line": 68,
-      "native": "torch_op",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
     },
     {
       "op": "transpose",
@@ -8740,15 +8428,6 @@
       "category": "fresh_input_timing"
     },
     {
-      "op": "type_as",
-      "source_file": "benchmark/test_type_as.py",
-      "source_test": "test_type_as",
-      "line": 222,
-      "native": "torch.ops.aten.type_as",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "unbind",
       "source_file": "benchmark/test_unbind.py",
       "source_test": "test_unbind",
@@ -8862,8 +8541,8 @@
       "source_test": "test_unpack_seq",
       "line": 134,
       "native": "vllm_unpack_seq",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression vllm_unpack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "unpack_seq_triton",
@@ -8871,8 +8550,8 @@
       "source_test": "test_unpack_seq_fp8",
       "line": 149,
       "native": "vllm_unpack_seq",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression vllm_unpack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "unpack_seq_triton",
@@ -8880,8 +8559,8 @@
       "source_test": "test_unpack_seq_int8",
       "line": 193,
       "native": "vllm_unpack_seq",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression vllm_unpack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "unsafe_chunk",
@@ -8983,15 +8662,6 @@
       "category": "custom_input_or_state"
     },
     {
-      "op": "upsample_bicubic2d_aa_backward",
-      "source_file": "benchmark/test_upsample_bicubic2d_aa.py",
-      "source_test": "test_upsample_bicubic2d_aa_backward",
-      "line": 111,
-      "native": "torch.ops.aten._upsample_bicubic2d_aa_backward",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "upsample_bicubic2d_backward",
       "source_file": "benchmark/test_upsample_bicubic2d_backward.py",
       "source_test": "test_upsample_bicubic2d_backward",
@@ -9019,24 +8689,6 @@
       "category": "custom_input_or_state"
     },
     {
-      "op": "upsample_bilinear2d_aa_backward",
-      "source_file": "benchmark/test_upsample_bilinear2d_aa_backward.py",
-      "source_test": "test_upsample_bilinear2d_aa_backward",
-      "line": 66,
-      "native": "torch.ops.aten._upsample_bilinear2d_aa_backward",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "upsample_bilinear2d_backward",
-      "source_file": "benchmark/test_upsample_bilinear2d_backward.py",
-      "source_test": "test_upsample_bilinear2d_backward",
-      "line": 200,
-      "native": "torch.ops.aten.upsample_bilinear2d_backward.default",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "upsample_bilinear2d_backward.grad_input",
       "source_file": "benchmark/test_upsample_bilinear2d_backward.py",
       "source_test": "test_upsample_bilinear2d_backward_grad_input",
@@ -9044,24 +8696,6 @@
       "native": "torch.ops.aten.upsample_bilinear2d_backward.grad_input",
       "reason": "dynamic or invalid operator name",
       "category": "variant_identity"
-    },
-    {
-      "op": "upsample_lanczos2d_aa_backward",
-      "source_file": "benchmark/test_upsample_lanczos2d_aa_backward.py",
-      "source_test": "test_upsample_lanczos2d_aa_backward",
-      "line": 155,
-      "native": "_composite_reference",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "upsample_lanczos2d_aa_backward_grad_input",
-      "source_file": "benchmark/test_upsample_lanczos2d_aa_backward.py",
-      "source_test": "test_upsample_lanczos2d_aa_backward_grad_input",
-      "line": 168,
-      "native": "_composite_reference_out",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
     },
     {
       "op": "upsample_linear1d",
@@ -9280,22 +8914,13 @@
       "category": "host_or_no_kernel"
     },
     {
-      "op": "vstack",
-      "source_file": "benchmark/test_vstack.py",
-      "source_test": "test_vstack",
-      "line": 61,
-      "native": "torch.vstack",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
       "op": "w8a8_block_fp8_matmul",
       "source_file": "benchmark/test_w8a8_block_fp8_matmul.py",
       "source_test": "test_perf_w8a8_block_fp8_matmul",
       "line": 122,
       "native": "vllm_w8a8_triton_block_scaled_mm",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source native expression vllm_w8a8_triton_block_scaled_mm resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+      "category": "external_dependency"
     },
     {
       "op": "weight_int4pack_mm",
@@ -9303,26 +8928,8 @@
       "source_test": "test_weight_int4pack_mm",
       "line": 229,
       "native": "_torch_reference_int4pack_mm",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "weight_int4pack_mm_with_scales_and_zeros",
-      "source_file": "benchmark/test_weight_int4pack_mm_with_scales_and_zeros.py",
-      "source_test": "test_weight_int4pack_mm_with_scales_and_zeros",
-      "line": 164,
-      "native": "_naive_dequant_mm",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
-    },
-    {
-      "op": "weight_int8pack_mm",
-      "source_file": "benchmark/test_weight_int8pack_mm.py",
-      "source_test": "test_weight_int8pack_mm",
-      "line": 89,
-      "native": "weight_int8pack_mm_torch",
-      "reason": "custom __init__ needs manual adaptation",
-      "category": "custom_input_or_state"
+      "reason": "Source reference performs cached ATen int4 repacking keyed by tensor identity and casts non-BF16 activations before GEMM. Constructor only sets gems_op; stable repacking/cache lifetime and the cross-dtype timed boundary need explicit adaptation.",
+      "category": "timing_boundary"
     },
     {
       "op": "weight_norm",
@@ -9945,5 +9552,1001 @@
       "reason": "No named benchmark constructor found in the pinned snapshot; representative performance geometry/API mapping still needs a decision.",
       "category": "missing_benchmark_geometry"
     }
-  ]
+  ],
+  "constructor_review": {
+    "scope": "All 78 original custom __init__ rejection records",
+    "reviewed_records": 78,
+    "implemented_records": 44,
+    "remaining_records": 34,
+    "added_modules": [
+      "_conj_physical",
+      "_conj_physical_out",
+      "_stack",
+      "argsort",
+      "assert_async",
+      "cat",
+      "column_stack",
+      "column_stack_out",
+      "concat",
+      "conj_physical",
+      "convert_weight_to_int4pack",
+      "einsum",
+      "grid_sample",
+      "grid_sampler_3d_backward",
+      "hstack",
+      "im2col",
+      "linalg_ldl_factor",
+      "mixed_dtypes_linear",
+      "multi_margin_loss",
+      "multi_margin_loss_backward",
+      "multi_margin_loss_backward_out",
+      "multi_margin_loss_out",
+      "router_gemm",
+      "row_stack",
+      "row_stack_out",
+      "sparse_semi_structured_linear",
+      "stack",
+      "to_copy_from_bfloat16",
+      "to_copy_from_float16",
+      "to_copy_from_float32",
+      "to_copy_from_int16",
+      "to_copy_from_int32",
+      "to_copy_from_int64",
+      "to_copy_from_int8",
+      "transform_bias_rescale_qkv",
+      "type_as",
+      "upsample_bicubic2d_aa_backward",
+      "upsample_bilinear2d_aa_backward",
+      "upsample_bilinear2d_backward",
+      "upsample_lanczos2d_aa_backward",
+      "upsample_lanczos2d_aa_backward_grad_input",
+      "vstack",
+      "weight_int4pack_mm_with_scales_and_zeros",
+      "weight_int8pack_mm"
+    ],
+    "results": [
+      {
+        "op": "concat",
+        "source_file": "benchmark/test_Concat.py",
+        "source_test": "test_Concat",
+        "line": 67,
+        "native": "torch.cat",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "concat"
+        ]
+      },
+      {
+        "op": "apply_repetition_penalties",
+        "source_file": "benchmark/test_apply_repetition_penalties.py",
+        "source_test": "test_apply_repetition_penalties",
+        "line": 75,
+        "native": "vllm_ops.apply_repetition_penalties",
+        "reason": "Source native expression vllm_ops.apply_repetition_penalties resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "argsort",
+        "source_file": "benchmark/test_argsort.py",
+        "source_test": "test_argsort",
+        "line": 203,
+        "native": "torch.argsort",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "argsort"
+        ]
+      },
+      {
+        "op": "assert_async",
+        "source_file": "benchmark/test_assert_async.py",
+        "source_test": "test_assert_async",
+        "line": 56,
+        "native": "torch._assert_async",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "assert_async"
+        ]
+      },
+      {
+        "op": "cat",
+        "source_file": "benchmark/test_cat.py",
+        "source_test": "test_cat",
+        "line": 65,
+        "native": "torch.cat",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "cat"
+        ]
+      },
+      {
+        "op": "column_stack",
+        "source_file": "benchmark/test_column_stack.py",
+        "source_test": "test_column_stack",
+        "line": 59,
+        "native": "torch.column_stack",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "column_stack"
+        ]
+      },
+      {
+        "op": "column_stack_out",
+        "source_file": "benchmark/test_column_stack.py",
+        "source_test": "test_column_stack_out",
+        "line": 80,
+        "native": "torch.column_stack",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "column_stack_out"
+        ]
+      },
+      {
+        "op": "conj_physical",
+        "source_file": "benchmark/test_conj_physical.py",
+        "source_test": "test_conj_physical",
+        "line": 91,
+        "native": "torch.conj_physical",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "conj_physical"
+        ]
+      },
+      {
+        "op": "_conj_physical",
+        "source_file": "benchmark/test_conj_physical.py",
+        "source_test": "test__conj_physical",
+        "line": 106,
+        "native": "torch.ops.aten._conj_physical",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "_conj_physical"
+        ]
+      },
+      {
+        "op": "_conj_physical_out",
+        "source_file": "benchmark/test_conj_physical.py",
+        "source_test": "test__conj_physical_out",
+        "line": 124,
+        "native": "torch.ops.aten._conj_physical.out",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "_conj_physical_out"
+        ]
+      },
+      {
+        "op": "convert_weight_to_int4pack",
+        "source_file": "benchmark/test_convert_weight_to_int4pack.py",
+        "source_test": "test_convert_weight_to_int4pack",
+        "line": 134,
+        "native": "torch._convert_weight_to_int4pack",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "convert_weight_to_int4pack"
+        ]
+      },
+      {
+        "op": "einsum",
+        "source_file": "benchmark/test_einsum.py",
+        "source_test": "test_einsum_matmul",
+        "line": 92,
+        "native": "lambda A, B: torch.einsum('ij,jk->ik', A, B)",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "einsum"
+        ]
+      },
+      {
+        "op": "einsum",
+        "source_file": "benchmark/test_einsum.py",
+        "source_test": "test_einsum_bmm",
+        "line": 103,
+        "native": "lambda A, B: torch.einsum('bij,bjk->bik', A, B)",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "einsum"
+        ]
+      },
+      {
+        "op": "fp8_einsum",
+        "source_file": "benchmark/test_fp8_einsum.py",
+        "source_test": "test_perf_fp8_einsum_gems_vs_deepgemm",
+        "line": 193,
+        "native": "_deepgemm_fp8_einsum_wrapper",
+        "reason": "The source reference calls DeepGEMM with FP8 block scaling and its JIT/runtime dependencies. Constructor block_shape is known, but this is not a standalone PyTorch callable.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "fused_marlin_moe_w4a16_int4",
+        "source_file": "benchmark/test_fused_marlin_moe_w4a16_int4.py",
+        "source_test": "test_fused_marlin_moe_w4a16_int4",
+        "line": 292,
+        "native": "_vllm_baseline",
+        "reason": "Source native expression _vllm_baseline resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "fused_marlin_moe_w4a16_mxfp4",
+        "source_file": "benchmark/test_fused_marlin_moe_w4a16_mxfp4.py",
+        "source_test": "test_fused_marlin_moe_w4a16_mxfp4",
+        "line": 276,
+        "native": "_vllm_baseline_mxfp4",
+        "reason": "Source native expression _vllm_baseline_mxfp4 resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "fused_marlin_moe_w8a16_int8",
+        "source_file": "benchmark/test_fused_marlin_moe_w8a16_int8.py",
+        "source_test": "test_fused_marlin_moe_w8a16_int8",
+        "line": 250,
+        "native": "_vllm_baseline_int8",
+        "reason": "Source native expression _vllm_baseline_int8 resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "fused_experts_impl",
+        "source_file": "benchmark/test_fused_moe.py",
+        "source_test": "test_fused_moe_impl_gems_vs_vllm",
+        "line": 265,
+        "native": "_vllm_fused_moe_wrapper",
+        "reason": "Source native expression _vllm_fused_moe_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "dispatch_fused_moe_kernel",
+        "source_file": "benchmark/test_fused_moe.py",
+        "source_test": "test_dispatch_fused_moe_kernel",
+        "line": 282,
+        "native": "_torch_dispatch_fused_moe_kernel_wrapper",
+        "reason": "The composite Torch reference writes C via C.copy_(), where C is a positional argument; input preparation also uses FlagGems MoE metadata helpers. Need explicit output-buffer annotation and dependency separation before using the shared readonly-positional-input validation/timing contract.",
+        "category": "output_buffer_contract",
+        "status": "pending"
+      },
+      {
+        "op": "fused_experts_impl",
+        "source_file": "benchmark/test_fused_moe_fp8.py",
+        "source_test": "test_fused_moe_fp8",
+        "line": 192,
+        "native": "_vllm_fused_moe_fp8_wrapper",
+        "reason": "Source native expression _vllm_fused_moe_fp8_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "fused_experts_impl",
+        "source_file": "benchmark/test_fused_moe_fp8_blockwise.py",
+        "source_test": "test_fused_moe_fp8_blockwise",
+        "line": 205,
+        "native": "_vllm_fused_moe_fp8_blockwise_wrapper",
+        "reason": "Source native expression _vllm_fused_moe_fp8_blockwise_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "fused_experts_impl",
+        "source_file": "benchmark/test_fused_moe_int4_w4a16.py",
+        "source_test": "test_fused_moe_int4_w4a16",
+        "line": 204,
+        "native": "_vllm_fused_moe_int4_w4a16_wrapper",
+        "reason": "Source native expression _vllm_fused_moe_int4_w4a16_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "fused_experts_impl",
+        "source_file": "benchmark/test_fused_moe_int8.py",
+        "source_test": "test_fused_experts_impl_int8",
+        "line": 184,
+        "native": "_vllm_fused_moe_int8_wrapper",
+        "reason": "Source native expression _vllm_fused_moe_int8_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "fused_experts_impl",
+        "source_file": "benchmark/test_fused_moe_int8_w8a16.py",
+        "source_test": "test_fused_experts_impl_int8_w8a16",
+        "line": 190,
+        "native": "_vllm_fused_moe_int8_w8a16_wrapper",
+        "reason": "Source native expression _vllm_fused_moe_int8_w8a16_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "fused_moe",
+        "source_file": "benchmark/test_fused_moe_w8a16.py",
+        "source_test": "test_fused_moe_w8a16_mxq",
+        "line": 305,
+        "native": "_baseline_w8a16_mxq_wrapper",
+        "reason": "Source native expression _baseline_w8a16_mxq_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "fused_moe",
+        "source_file": "benchmark/test_fused_moe_w8a16.py",
+        "source_test": "test_fused_moe_w8a16_mxq_gems_vs_vllm",
+        "line": 321,
+        "native": "_baseline_w8a16_mxq_wrapper_vllm",
+        "reason": "Source native expression _baseline_w8a16_mxq_wrapper_vllm resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "get_paged_mqa_logits_metadata",
+        "source_file": "benchmark/test_get_paged_mql_logits_metadata.py",
+        "source_test": "test_get_paged_mqa_logits_metadata",
+        "line": 89,
+        "native": "get_paged_mqa_logits_metadata",
+        "reason": "Source native expression get_paged_mqa_logits_metadata resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "grid_sample",
+        "source_file": "benchmark/test_grid_sample.py",
+        "source_test": "test_grid_sample",
+        "line": 208,
+        "native": "torch.nn.functional.grid_sample",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "grid_sample"
+        ]
+      },
+      {
+        "op": "grid_sampler_3d_backward",
+        "source_file": "benchmark/test_grid_sampler_3d_backward.py",
+        "source_test": "test_grid_sampler_3d_backward",
+        "line": 53,
+        "native": "torch.ops.aten.grid_sampler_3d_backward.default",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "grid_sampler_3d_backward"
+        ]
+      },
+      {
+        "op": "grouped_topk",
+        "source_file": "benchmark/test_grouped_topk.py",
+        "source_test": "test_grouped_topk_no_renorm",
+        "line": 105,
+        "native": "vllm_grouped_topk",
+        "reason": "Source native expression vllm_grouped_topk resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "grouped_topk",
+        "source_file": "benchmark/test_grouped_topk.py",
+        "source_test": "test_grouped_topk_score_0",
+        "line": 134,
+        "native": "vllm_grouped_topk",
+        "reason": "Source native expression vllm_grouped_topk resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "grouped_topk",
+        "source_file": "benchmark/test_grouped_topk.py",
+        "source_test": "test_grouped_topk_score_1",
+        "line": 163,
+        "native": "vllm_grouped_topk",
+        "reason": "Source native expression vllm_grouped_topk resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "hstack",
+        "source_file": "benchmark/test_hstack.py",
+        "source_test": "test_hstack",
+        "line": 50,
+        "native": "torch.hstack",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "hstack"
+        ]
+      },
+      {
+        "op": "im2col",
+        "source_file": "benchmark/test_im2col.py",
+        "source_test": "test_im2col",
+        "line": 48,
+        "native": "torch.ops.aten.im2col",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "im2col"
+        ]
+      },
+      {
+        "op": "inplace_fused_experts",
+        "source_file": "benchmark/test_inplace_fused_experts.py",
+        "source_test": "test_inplace_fused_experts_gems_vs_vllm",
+        "line": 126,
+        "native": "_vllm_inplace_fused_experts_wrapper",
+        "reason": "Source native expression _vllm_inplace_fused_experts_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "linalg__powsum",
+        "source_file": "benchmark/test_linalg__powsum.py",
+        "source_test": "test_linalg__powsum",
+        "line": 44,
+        "native": "torch.ops.aten.linalg__powsum.default",
+        "reason": "Constructor ord=[1,2,3] and CORE_SHAPES are explicit, but torch.ops.aten.linalg__powsum.default is not exported by this machine's Torch 2.8 build. No substitute API was invented.",
+        "category": "native_cuda_unavailable",
+        "status": "pending"
+      },
+      {
+        "op": "linalg_ldl_factor",
+        "source_file": "benchmark/test_linalg_ldl_factor.py",
+        "source_test": "test_linalg_ldl_factor",
+        "line": 53,
+        "native": "torch.linalg.ldl_factor",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "linalg_ldl_factor"
+        ]
+      },
+      {
+        "op": "mhc_pre",
+        "source_file": "benchmark/test_mhc.py",
+        "source_test": "test_mhc_pre",
+        "line": 144,
+        "native": "mhc_pre_ref",
+        "reason": "The source Torch reference and/or input preparation imports flag_gems.fused.mhc helpers (including sinkhorn_forward for mhc_bwd). Constructor constants are known; vendoring/verifying the transitive reference is a separate dependency adaptation.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "hc_split_sinkhorn_forward",
+        "source_file": "benchmark/test_mhc.py",
+        "source_test": "test_hc_split_sinkhorn_forward",
+        "line": 193,
+        "native": "mhc_split_sinkhorn_torch_ref",
+        "reason": "The source Torch reference and/or input preparation imports flag_gems.fused.mhc helpers (including sinkhorn_forward for mhc_bwd). Constructor constants are known; vendoring/verifying the transitive reference is a separate dependency adaptation.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "mhc_bwd",
+        "source_file": "benchmark/test_mhc.py",
+        "source_test": "test_mhc_bwd",
+        "line": 238,
+        "native": "mhc_bwd_ref",
+        "reason": "The source Torch reference and/or input preparation imports flag_gems.fused.mhc helpers (including sinkhorn_forward for mhc_bwd). Constructor constants are known; vendoring/verifying the transitive reference is a separate dependency adaptation.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "mixed_dtypes_linear",
+        "source_file": "benchmark/test_mixed_dtypes_linear.py",
+        "source_test": "test_mixed_dtypes_linear",
+        "line": 128,
+        "native": "mixed_dtypes_linear_torch",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "mixed_dtypes_linear"
+        ]
+      },
+      {
+        "op": "multi_margin_loss",
+        "source_file": "benchmark/test_multi_margin_loss.py",
+        "source_test": "test_multi_margin_loss",
+        "line": 114,
+        "native": "torch.ops.aten.multi_margin_loss",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "multi_margin_loss"
+        ]
+      },
+      {
+        "op": "multi_margin_loss_out",
+        "source_file": "benchmark/test_multi_margin_loss.py",
+        "source_test": "test_multi_margin_loss_out",
+        "line": 132,
+        "native": "torch.ops.aten.multi_margin_loss.out",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "multi_margin_loss_out"
+        ]
+      },
+      {
+        "op": "multi_margin_loss_backward",
+        "source_file": "benchmark/test_multi_margin_loss.py",
+        "source_test": "test_multi_margin_loss_backward",
+        "line": 150,
+        "native": "torch.ops.aten.multi_margin_loss_backward",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "multi_margin_loss_backward"
+        ]
+      },
+      {
+        "op": "multi_margin_loss_backward_out",
+        "source_file": "benchmark/test_multi_margin_loss.py",
+        "source_test": "test_multi_margin_loss_backward_out",
+        "line": 168,
+        "native": "torch.ops.aten.multi_margin_loss_backward.grad_input",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "multi_margin_loss_backward_out"
+        ]
+      },
+      {
+        "op": "outplace_fused_experts",
+        "source_file": "benchmark/test_outplace_fused_experts.py",
+        "source_test": "test_outplace_fused_experts_gems_vs_vllm",
+        "line": 113,
+        "native": "_vllm_outplace_fused_experts_wrapper",
+        "reason": "Source native expression _vllm_outplace_fused_experts_wrapper resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "pack_seq_triton",
+        "source_file": "benchmark/test_pack_seq.py",
+        "source_test": "test_pack_seq",
+        "line": 131,
+        "native": "vllm_pack_seq",
+        "reason": "Source native expression vllm_pack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "pack_seq_triton",
+        "source_file": "benchmark/test_pack_seq.py",
+        "source_test": "test_pack_seq_fp8",
+        "line": 175,
+        "native": "vllm_pack_seq",
+        "reason": "Source native expression vllm_pack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "pack_seq_triton",
+        "source_file": "benchmark/test_pack_seq.py",
+        "source_test": "test_pack_seq_int8",
+        "line": 190,
+        "native": "vllm_pack_seq",
+        "reason": "Source native expression vllm_pack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "quantized_gru",
+        "source_file": "benchmark/test_quantized_gru.py",
+        "source_test": "test_quantized_gru",
+        "line": 120,
+        "native": "torch_gru_baseline",
+        "reason": "The source factory creates packed quantized parameter ScriptObject inputs. Current config/NCU reconstruction supports tensors/scalars, not a serializable packed ScriptObject contract; removing the harmless constructor does not resolve this.",
+        "category": "opaque_input_metadata",
+        "status": "pending"
+      },
+      {
+        "op": "router_gemm",
+        "source_file": "benchmark/test_router_gemm.py",
+        "source_test": "test_perf_router_gemm",
+        "line": 87,
+        "native": "torch_router_gemm",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "router_gemm"
+        ]
+      },
+      {
+        "op": "row_stack",
+        "source_file": "benchmark/test_row_stack.py",
+        "source_test": "test_row_stack",
+        "line": 70,
+        "native": "torch.row_stack",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "row_stack"
+        ]
+      },
+      {
+        "op": "row_stack_out",
+        "source_file": "benchmark/test_row_stack.py",
+        "source_test": "test_row_stack_out",
+        "line": 96,
+        "native": "torch.row_stack",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "row_stack_out"
+        ]
+      },
+      {
+        "op": "sparse_semi_structured_linear",
+        "source_file": "benchmark/test_sparse_semi_structured_linear.py",
+        "source_test": "test_sparse_semi_structured_linear",
+        "line": 99,
+        "native": "_torch_ref",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "sparse_semi_structured_linear"
+        ]
+      },
+      {
+        "op": "sparse_semi_structured_linear",
+        "source_file": "benchmark/test_sparse_semi_structured_linear.py",
+        "source_test": "test_sparse_semi_structured_linear_with_bias",
+        "line": 110,
+        "native": "_torch_ref_with_bias",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "sparse_semi_structured_linear"
+        ]
+      },
+      {
+        "op": "split",
+        "source_file": "benchmark/test_split.py",
+        "source_test": "test_split",
+        "line": 151,
+        "native": "torch.ops.aten.split",
+        "reason": "Source split.Tensor/sizes returns tensor views and split.str is a host string operation. These do not launch CUDA compute kernels; covering them requires a host/metadata timing policy, not constructor adaptation.",
+        "category": "host_or_no_kernel",
+        "status": "pending"
+      },
+      {
+        "op": "stack",
+        "source_file": "benchmark/test_stack.py",
+        "source_test": "test_stack",
+        "line": 63,
+        "native": "torch.stack",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "stack"
+        ]
+      },
+      {
+        "op": "_stack",
+        "source_file": "benchmark/test_stack.py",
+        "source_test": "test__stack",
+        "line": 77,
+        "native": "torch._stack",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "_stack"
+        ]
+      },
+      {
+        "op": "to_copy",
+        "source_file": "benchmark/test_to_copy.py",
+        "source_test": "test_to_copy",
+        "line": 98,
+        "native": "torch.ops.aten._to_copy",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "to_copy_from_float32",
+          "to_copy_from_float16",
+          "to_copy_from_bfloat16",
+          "to_copy_from_int8",
+          "to_copy_from_int16",
+          "to_copy_from_int32",
+          "to_copy_from_int64"
+        ]
+      },
+      {
+        "op": "to_copy",
+        "source_file": "benchmark/test_to_copy.py",
+        "source_test": "test_to_copy",
+        "line": 108,
+        "native": "torch.ops.aten._to_copy",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "to_copy_from_float32",
+          "to_copy_from_float16",
+          "to_copy_from_bfloat16",
+          "to_copy_from_int8",
+          "to_copy_from_int16",
+          "to_copy_from_int32",
+          "to_copy_from_int64"
+        ]
+      },
+      {
+        "op": "to_copy",
+        "source_file": "benchmark/test_to_copy.py",
+        "source_test": "test_to_copy",
+        "line": 118,
+        "native": "torch.ops.aten._to_copy",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "to_copy_from_float32",
+          "to_copy_from_float16",
+          "to_copy_from_bfloat16",
+          "to_copy_from_int8",
+          "to_copy_from_int16",
+          "to_copy_from_int32",
+          "to_copy_from_int64"
+        ]
+      },
+      {
+        "op": "to_copy",
+        "source_file": "benchmark/test_to_copy.py",
+        "source_test": "test_to_copy",
+        "line": 128,
+        "native": "torch.ops.aten._to_copy",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "to_copy_from_float32",
+          "to_copy_from_float16",
+          "to_copy_from_bfloat16",
+          "to_copy_from_int8",
+          "to_copy_from_int16",
+          "to_copy_from_int32",
+          "to_copy_from_int64"
+        ]
+      },
+      {
+        "op": "to_copy",
+        "source_file": "benchmark/test_to_copy.py",
+        "source_test": "test_to_copy",
+        "line": 140,
+        "native": "torch.ops.aten._to_copy",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "to_copy_from_float32",
+          "to_copy_from_float16",
+          "to_copy_from_bfloat16",
+          "to_copy_from_int8",
+          "to_copy_from_int16",
+          "to_copy_from_int32",
+          "to_copy_from_int64"
+        ]
+      },
+      {
+        "op": "transform_bias_rescale_qkv",
+        "source_file": "benchmark/test_transform_bias_rescale_qkv.py",
+        "source_test": "test__transform_bias_rescale_qkv",
+        "line": 68,
+        "native": "torch_op",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "transform_bias_rescale_qkv"
+        ]
+      },
+      {
+        "op": "type_as",
+        "source_file": "benchmark/test_type_as.py",
+        "source_test": "test_type_as",
+        "line": 222,
+        "native": "torch.ops.aten.type_as",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "type_as"
+        ]
+      },
+      {
+        "op": "unpack_seq_triton",
+        "source_file": "benchmark/test_unpack_seq.py",
+        "source_test": "test_unpack_seq",
+        "line": 134,
+        "native": "vllm_unpack_seq",
+        "reason": "Source native expression vllm_unpack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "unpack_seq_triton",
+        "source_file": "benchmark/test_unpack_seq.py",
+        "source_test": "test_unpack_seq_fp8",
+        "line": 149,
+        "native": "vllm_unpack_seq",
+        "reason": "Source native expression vllm_unpack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "unpack_seq_triton",
+        "source_file": "benchmark/test_unpack_seq.py",
+        "source_test": "test_unpack_seq_int8",
+        "line": 193,
+        "native": "vllm_unpack_seq",
+        "reason": "Source native expression vllm_unpack_seq resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "upsample_bicubic2d_aa_backward",
+        "source_file": "benchmark/test_upsample_bicubic2d_aa.py",
+        "source_test": "test_upsample_bicubic2d_aa_backward",
+        "line": 111,
+        "native": "torch.ops.aten._upsample_bicubic2d_aa_backward",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "upsample_bicubic2d_aa_backward"
+        ]
+      },
+      {
+        "op": "upsample_bilinear2d_aa_backward",
+        "source_file": "benchmark/test_upsample_bilinear2d_aa_backward.py",
+        "source_test": "test_upsample_bilinear2d_aa_backward",
+        "line": 66,
+        "native": "torch.ops.aten._upsample_bilinear2d_aa_backward",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "upsample_bilinear2d_aa_backward"
+        ]
+      },
+      {
+        "op": "upsample_bilinear2d_backward",
+        "source_file": "benchmark/test_upsample_bilinear2d_backward.py",
+        "source_test": "test_upsample_bilinear2d_backward",
+        "line": 200,
+        "native": "torch.ops.aten.upsample_bilinear2d_backward.default",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "upsample_bilinear2d_backward"
+        ]
+      },
+      {
+        "op": "upsample_lanczos2d_aa_backward",
+        "source_file": "benchmark/test_upsample_lanczos2d_aa_backward.py",
+        "source_test": "test_upsample_lanczos2d_aa_backward",
+        "line": 155,
+        "native": "_composite_reference",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "upsample_lanczos2d_aa_backward"
+        ]
+      },
+      {
+        "op": "upsample_lanczos2d_aa_backward_grad_input",
+        "source_file": "benchmark/test_upsample_lanczos2d_aa_backward.py",
+        "source_test": "test_upsample_lanczos2d_aa_backward_grad_input",
+        "line": 168,
+        "native": "_composite_reference_out",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "upsample_lanczos2d_aa_backward_grad_input"
+        ]
+      },
+      {
+        "op": "vstack",
+        "source_file": "benchmark/test_vstack.py",
+        "source_test": "test_vstack",
+        "line": 61,
+        "native": "torch.vstack",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "vstack"
+        ]
+      },
+      {
+        "op": "w8a8_block_fp8_matmul",
+        "source_file": "benchmark/test_w8a8_block_fp8_matmul.py",
+        "source_test": "test_perf_w8a8_block_fp8_matmul",
+        "line": 122,
+        "native": "vllm_w8a8_triton_block_scaled_mm",
+        "reason": "Source native expression vllm_w8a8_triton_block_scaled_mm resolves to vLLM (and, for some variants, its quantization/DeepGEMM helpers), not a standalone PyTorch API. The constructor itself is understood; independent native/reference and preprocessing contracts are required.",
+        "category": "external_dependency",
+        "status": "pending"
+      },
+      {
+        "op": "weight_int4pack_mm",
+        "source_file": "benchmark/test_weight_int4pack_mm.py",
+        "source_test": "test_weight_int4pack_mm",
+        "line": 229,
+        "native": "_torch_reference_int4pack_mm",
+        "reason": "Source reference performs cached ATen int4 repacking keyed by tensor identity and casts non-BF16 activations before GEMM. Constructor only sets gems_op; stable repacking/cache lifetime and the cross-dtype timed boundary need explicit adaptation.",
+        "category": "timing_boundary",
+        "status": "pending"
+      },
+      {
+        "op": "weight_int4pack_mm_with_scales_and_zeros",
+        "source_file": "benchmark/test_weight_int4pack_mm_with_scales_and_zeros.py",
+        "source_test": "test_weight_int4pack_mm_with_scales_and_zeros",
+        "line": 164,
+        "native": "_naive_dequant_mm",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "weight_int4pack_mm_with_scales_and_zeros"
+        ]
+      },
+      {
+        "op": "weight_int8pack_mm",
+        "source_file": "benchmark/test_weight_int8pack_mm.py",
+        "source_test": "test_weight_int8pack_mm",
+        "line": 89,
+        "native": "weight_int8pack_mm_torch",
+        "reason": "Constructor input/shape state explicitly adapted and validated; reporting-only state omitted.",
+        "category": "implemented",
+        "status": "implemented",
+        "modules": [
+          "weight_int8pack_mm"
+        ]
+      }
+    ]
+  }
 }

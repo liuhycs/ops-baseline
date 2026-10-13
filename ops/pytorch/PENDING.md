@@ -18,3 +18,7 @@
 具体例子：`grouped_mm` 在当前 H20/Torch 上触发设备断言，已经隔离并排除；`unsafe_masked_index_put_accumulate` 的上游输入使用 int32 mask，而 meta 校验要求 bool，因此暂不把仅能发出 CUDA kernel 当成语义正确的证据。`svd` 仅保留实际可运行的 float32；`_cast_Int` 的 int32 输入是 native no-op，因此该 dtype 暂不纳入。
 
 新增集合本身只复用现有采集器，没有顺带修改计时、NCU 指标、算子发现或 vLLM/SGLang 模块。
+
+## 自定义构造函数复查结果
+
+已处理原先所有 78 条泛化构造函数拒绝：44 条适配完成，34 条保留具体原因。vLLM/DeepGEMM 来源、FlagGems MHC 参考函数依赖、quantized GRU 的 packed ScriptObject、split 的纯视图/字符串行为、缺失的 ATen linalg__powsum，以及缓存式 int4 重打包的计时边界，均不能用简单移除构造函数解决。详见 `coverage.json.constructor_review`。

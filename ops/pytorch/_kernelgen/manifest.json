@@ -11366,6 +11366,741 @@
         "torch.float32",
         "torch.bfloat16"
       ]
+    },
+    "concat": {
+      "source_file": "benchmark/test_Concat.py",
+      "source_test": "test_Concat",
+      "line": 67,
+      "native": "torch.cat",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16] + [torch.int16, torch.int32]",
+      "shape_source": "benchmark/core_shapes.yaml ConcatBenchmark",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16",
+        "torch.int16",
+        "torch.int32"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "argsort": {
+      "source_file": "benchmark/test_argsort.py",
+      "source_test": "test_argsort",
+      "line": 203,
+      "native": "torch.argsort",
+      "dtype_expression": "[torch.int16, torch.int32] + [torch.int8, torch.uint8, torch.int64] + [torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "benchmark/core_shapes.yaml GenericBenchmark2DOnly",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.int16",
+        "torch.int32",
+        "torch.int8",
+        "torch.uint8",
+        "torch.int64",
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "assert_async": {
+      "source_file": "benchmark/test_assert_async.py",
+      "source_test": "test_assert_async",
+      "line": 56,
+      "native": "torch._assert_async",
+      "dtype_expression": "[torch.bool, torch.int32, torch.float32, torch.float16, torch.bfloat16]",
+      "shape_source": "explicit source set_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 4,
+      "dtypes": [
+        "torch.bool",
+        "torch.int32",
+        "torch.float32",
+        "torch.float16",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "cat": {
+      "source_file": "benchmark/test_cat.py",
+      "source_test": "test_cat",
+      "line": 65,
+      "native": "torch.cat",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16] + [torch.int16, torch.int32]",
+      "shape_source": "benchmark/core_shapes.yaml Benchmark; source MAX_ELEMENTS=536870912",
+      "family": "explicit custom constructor adapter",
+      "cases": 3,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16",
+        "torch.int16",
+        "torch.int32"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "column_stack": {
+      "source_file": "benchmark/test_column_stack.py",
+      "source_test": "test_column_stack",
+      "line": 59,
+      "native": "torch.column_stack",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "benchmark/core_shapes.yaml Benchmark; source MAX_ELEMENTS=536870912",
+      "family": "explicit custom constructor adapter",
+      "cases": 3,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "column_stack_out": {
+      "source_file": "benchmark/test_column_stack.py",
+      "source_test": "test_column_stack_out",
+      "line": 80,
+      "native": "torch.column_stack",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "benchmark/core_shapes.yaml Benchmark; source MAX_ELEMENTS=536870912",
+      "family": "explicit custom constructor adapter",
+      "cases": 3,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "convert_weight_to_int4pack": {
+      "source_file": "benchmark/test_convert_weight_to_int4pack.py",
+      "source_test": "test_convert_weight_to_int4pack",
+      "line": 134,
+      "native": "torch._convert_weight_to_int4pack",
+      "dtype_expression": "[torch.uint8]",
+      "shape_source": "explicit source set_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 12,
+      "dtypes": [
+        "torch.uint8"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "grid_sample": {
+      "source_file": "benchmark/test_grid_sample.py",
+      "source_test": "test_grid_sample",
+      "line": 208,
+      "native": "torch.nn.functional.grid_sample",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "source constructor calls set_more_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 14,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "grid_sampler_3d_backward": {
+      "source_file": "benchmark/test_grid_sampler_3d_backward.py",
+      "source_test": "test_grid_sampler_3d_backward",
+      "line": 53,
+      "native": "torch.ops.aten.grid_sampler_3d_backward.default",
+      "dtype_expression": "[torch.float32]",
+      "shape_source": "explicit source set_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.float32"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "hstack": {
+      "source_file": "benchmark/test_hstack.py",
+      "source_test": "test_hstack",
+      "line": 50,
+      "native": "torch.hstack",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "benchmark/core_shapes.yaml hstack",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "im2col": {
+      "source_file": "benchmark/test_im2col.py",
+      "source_test": "test_im2col",
+      "line": 48,
+      "native": "torch.ops.aten.im2col",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "explicit source set_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 16,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "linalg_ldl_factor": {
+      "source_file": "benchmark/test_linalg_ldl_factor.py",
+      "source_test": "test_linalg_ldl_factor",
+      "line": 53,
+      "native": "torch.linalg.ldl_factor",
+      "dtype_expression": "[torch.float32, torch.float64]",
+      "shape_source": "explicit source set_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.float32",
+        "torch.float64"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "row_stack": {
+      "source_file": "benchmark/test_row_stack.py",
+      "source_test": "test_row_stack",
+      "line": 70,
+      "native": "torch.row_stack",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "benchmark/core_shapes.yaml Benchmark; source MAX_ELEMENTS=536870912",
+      "family": "explicit custom constructor adapter",
+      "cases": 3,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "row_stack_out": {
+      "source_file": "benchmark/test_row_stack.py",
+      "source_test": "test_row_stack_out",
+      "line": 96,
+      "native": "torch.row_stack",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "benchmark/core_shapes.yaml Benchmark; source MAX_ELEMENTS=536870912",
+      "family": "explicit custom constructor adapter",
+      "cases": 3,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "stack": {
+      "source_file": "benchmark/test_stack.py",
+      "source_test": "test_stack",
+      "line": 63,
+      "native": "torch.stack",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "benchmark/core_shapes.yaml Benchmark; source MAX_ELEMENTS=536870912",
+      "family": "explicit custom constructor adapter",
+      "cases": 3,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "_stack": {
+      "source_file": "benchmark/test_stack.py",
+      "source_test": "test__stack",
+      "line": 77,
+      "native": "torch._stack",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "benchmark/core_shapes.yaml Benchmark; source MAX_ELEMENTS=536870912",
+      "family": "explicit custom constructor adapter",
+      "cases": 3,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "upsample_bicubic2d_aa_backward": {
+      "source_file": "benchmark/test_upsample_bicubic2d_aa.py",
+      "source_test": "test_upsample_bicubic2d_aa_backward",
+      "line": 111,
+      "native": "torch.ops.aten._upsample_bicubic2d_aa_backward",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "fixed source constructor _cfgs",
+      "family": "explicit custom constructor adapter",
+      "cases": 16,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "upsample_bilinear2d_aa_backward": {
+      "source_file": "benchmark/test_upsample_bilinear2d_aa_backward.py",
+      "source_test": "test_upsample_bilinear2d_aa_backward",
+      "line": 66,
+      "native": "torch.ops.aten._upsample_bilinear2d_aa_backward",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "fixed source constructor _cfgs",
+      "family": "explicit custom constructor adapter",
+      "cases": 16,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "upsample_lanczos2d_aa_backward": {
+      "source_file": "benchmark/test_upsample_lanczos2d_aa_backward.py",
+      "source_test": "test_upsample_lanczos2d_aa_backward",
+      "line": 155,
+      "native": "_composite_reference",
+      "dtype_expression": "[torch.float16, torch.float32]",
+      "shape_source": "fixed source constructor _configs",
+      "family": "explicit custom constructor adapter",
+      "cases": 4,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "vstack": {
+      "source_file": "benchmark/test_vstack.py",
+      "source_test": "test_vstack",
+      "line": 61,
+      "native": "torch.vstack",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "benchmark/core_shapes.yaml Benchmark; source MAX_ELEMENTS=536870912",
+      "family": "explicit custom constructor adapter",
+      "cases": 3,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "weight_int4pack_mm_with_scales_and_zeros": {
+      "source_file": "benchmark/test_weight_int4pack_mm_with_scales_and_zeros.py",
+      "source_test": "test_weight_int4pack_mm_with_scales_and_zeros",
+      "line": 164,
+      "native": "_naive_dequant_mm",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "explicit source set_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 16,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "weight_int8pack_mm": {
+      "source_file": "benchmark/test_weight_int8pack_mm.py",
+      "source_test": "test_weight_int8pack_mm",
+      "line": 89,
+      "native": "weight_int8pack_mm_torch",
+      "dtype_expression": "FP16_BF16_DTYPES",
+      "shape_source": "explicit source set_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 21,
+      "dtypes": [
+        "torch.float16",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "conj_physical": {
+      "source_file": "benchmark/test_conj_physical.py",
+      "source_test": "test_conj_physical",
+      "line": 91,
+      "native": "torch.conj_physical",
+      "dtype_expression": "[torch.complex64]",
+      "shape_source": "explicit source set_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 6,
+      "dtypes": [
+        "torch.complex64"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "_conj_physical": {
+      "source_file": "benchmark/test_conj_physical.py",
+      "source_test": "test__conj_physical",
+      "line": 106,
+      "native": "torch.ops.aten._conj_physical",
+      "dtype_expression": "[torch.complex64]",
+      "shape_source": "explicit source set_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 6,
+      "dtypes": [
+        "torch.complex64"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "_conj_physical_out": {
+      "source_file": "benchmark/test_conj_physical.py",
+      "source_test": "test__conj_physical_out",
+      "line": 124,
+      "native": "torch.ops.aten._conj_physical.out",
+      "dtype_expression": "[torch.complex64]",
+      "shape_source": "explicit source set_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 6,
+      "dtypes": [
+        "torch.complex64"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "router_gemm": {
+      "source_file": "benchmark/test_router_gemm.py",
+      "source_test": "test_perf_router_gemm",
+      "line": 87,
+      "native": "torch_router_gemm",
+      "dtype_expression": "[torch.bfloat16]",
+      "shape_source": "explicit source set_shapes",
+      "family": "explicit custom constructor adapter",
+      "cases": 10,
+      "dtypes": [
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "sparse_semi_structured_linear": {
+      "source_file": "benchmark/test_sparse_semi_structured_linear.py",
+      "source_test": "test_sparse_semi_structured_linear",
+      "line": 99,
+      "native": "_native",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "source set_shapes; both use_bias constructors",
+      "family": "explicit custom constructor adapter",
+      "cases": 6,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "einsum": {
+      "source_file": "benchmark/test_einsum.py",
+      "source_test": "test_einsum_matmul",
+      "line": 92,
+      "native": "torch.einsum",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "source DEFAULT_SHAPES; both matmul and batched constructors retained",
+      "family": "explicit custom constructor adapter",
+      "cases": 6,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "multi_margin_loss": {
+      "source_file": "benchmark/test_multi_margin_loss.py",
+      "source_test": "test_multi_margin_loss",
+      "line": 114,
+      "native": "torch.ops.aten.multi_margin_loss",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16] + [torch.float64]",
+      "shape_source": "source loss DEFAULT_SHAPES; all 2x2x3 p/weighted/reduction combinations",
+      "family": "explicit custom constructor adapter",
+      "cases": 60,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16",
+        "torch.float64"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "multi_margin_loss_out": {
+      "source_file": "benchmark/test_multi_margin_loss.py",
+      "source_test": "test_multi_margin_loss_out",
+      "line": 132,
+      "native": "torch.ops.aten.multi_margin_loss.out",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16] + [torch.float64]",
+      "shape_source": "source loss DEFAULT_SHAPES; all 2x2x3 p/weighted/reduction combinations",
+      "family": "explicit custom constructor adapter",
+      "cases": 60,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16",
+        "torch.float64"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "multi_margin_loss_backward": {
+      "source_file": "benchmark/test_multi_margin_loss.py",
+      "source_test": "test_multi_margin_loss_backward",
+      "line": 150,
+      "native": "torch.ops.aten.multi_margin_loss_backward",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16] + [torch.float64]",
+      "shape_source": "source loss DEFAULT_SHAPES; all 2x2x3 p/weighted/reduction combinations",
+      "family": "explicit custom constructor adapter",
+      "cases": 60,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16",
+        "torch.float64"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "multi_margin_loss_backward_out": {
+      "source_file": "benchmark/test_multi_margin_loss.py",
+      "source_test": "test_multi_margin_loss_backward_out",
+      "line": 168,
+      "native": "torch.ops.aten.multi_margin_loss_backward.grad_input",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16] + [torch.float64]",
+      "shape_source": "source loss DEFAULT_SHAPES; all 2x2x3 p/weighted/reduction combinations",
+      "family": "explicit custom constructor adapter",
+      "cases": 60,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16",
+        "torch.float64"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "to_copy_from_float32": {
+      "source_file": "benchmark/test_to_copy.py",
+      "source_test": "test_to_copy",
+      "line": 98,
+      "native": "torch.ops.aten._to_copy",
+      "dtype_expression": "[torch.float16, torch.bfloat16, torch.float64, torch.int8, torch.int16, torch.int32, torch.int64, torch.uint8]",
+      "shape_source": "source YAML default shapes and all source/destination loop pairs; source dtype in operator identity",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.float16",
+        "torch.bfloat16",
+        "torch.float64",
+        "torch.int8",
+        "torch.int16",
+        "torch.int32",
+        "torch.int64",
+        "torch.uint8"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted.",
+      "source_op": "to_copy"
+    },
+    "to_copy_from_float16": {
+      "source_file": "benchmark/test_to_copy.py",
+      "source_test": "test_to_copy",
+      "line": 98,
+      "native": "torch.ops.aten._to_copy",
+      "dtype_expression": "[torch.bfloat16, torch.float64, torch.int8, torch.int16, torch.int32, torch.int64, torch.uint8]",
+      "shape_source": "source YAML default shapes and all source/destination loop pairs; source dtype in operator identity",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.bfloat16",
+        "torch.float64",
+        "torch.int8",
+        "torch.int16",
+        "torch.int32",
+        "torch.int64",
+        "torch.uint8"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted.",
+      "source_op": "to_copy"
+    },
+    "to_copy_from_bfloat16": {
+      "source_file": "benchmark/test_to_copy.py",
+      "source_test": "test_to_copy",
+      "line": 98,
+      "native": "torch.ops.aten._to_copy",
+      "dtype_expression": "[torch.float16, torch.float64, torch.int8, torch.int16, torch.int32, torch.int64, torch.uint8]",
+      "shape_source": "source YAML default shapes and all source/destination loop pairs; source dtype in operator identity",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.float16",
+        "torch.float64",
+        "torch.int8",
+        "torch.int16",
+        "torch.int32",
+        "torch.int64",
+        "torch.uint8"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted.",
+      "source_op": "to_copy"
+    },
+    "to_copy_from_int8": {
+      "source_file": "benchmark/test_to_copy.py",
+      "source_test": "test_to_copy",
+      "line": 98,
+      "native": "torch.ops.aten._to_copy",
+      "dtype_expression": "[torch.float32, torch.float16, torch.bfloat16, torch.int16, torch.int32, torch.int64]",
+      "shape_source": "source YAML default shapes and all source/destination loop pairs; source dtype in operator identity",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.float32",
+        "torch.float16",
+        "torch.bfloat16",
+        "torch.int16",
+        "torch.int32",
+        "torch.int64"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted.",
+      "source_op": "to_copy"
+    },
+    "to_copy_from_int16": {
+      "source_file": "benchmark/test_to_copy.py",
+      "source_test": "test_to_copy",
+      "line": 98,
+      "native": "torch.ops.aten._to_copy",
+      "dtype_expression": "[torch.float32, torch.float16, torch.bfloat16, torch.int8, torch.int32, torch.int64]",
+      "shape_source": "source YAML default shapes and all source/destination loop pairs; source dtype in operator identity",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.float32",
+        "torch.float16",
+        "torch.bfloat16",
+        "torch.int8",
+        "torch.int32",
+        "torch.int64"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted.",
+      "source_op": "to_copy"
+    },
+    "to_copy_from_int32": {
+      "source_file": "benchmark/test_to_copy.py",
+      "source_test": "test_to_copy",
+      "line": 98,
+      "native": "torch.ops.aten._to_copy",
+      "dtype_expression": "[torch.float32, torch.float16, torch.bfloat16, torch.int8, torch.int16, torch.int64]",
+      "shape_source": "source YAML default shapes and all source/destination loop pairs; source dtype in operator identity",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.float32",
+        "torch.float16",
+        "torch.bfloat16",
+        "torch.int8",
+        "torch.int16",
+        "torch.int64"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted.",
+      "source_op": "to_copy"
+    },
+    "to_copy_from_int64": {
+      "source_file": "benchmark/test_to_copy.py",
+      "source_test": "test_to_copy",
+      "line": 98,
+      "native": "torch.ops.aten._to_copy",
+      "dtype_expression": "[torch.float32, torch.float16, torch.bfloat16, torch.int8, torch.int16, torch.int32]",
+      "shape_source": "source YAML default shapes and all source/destination loop pairs; source dtype in operator identity",
+      "family": "explicit custom constructor adapter",
+      "cases": 5,
+      "dtypes": [
+        "torch.float32",
+        "torch.float16",
+        "torch.bfloat16",
+        "torch.int8",
+        "torch.int16",
+        "torch.int32"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted.",
+      "source_op": "to_copy"
+    },
+    "type_as": {
+      "source_file": "benchmark/test_type_as.py",
+      "source_test": "test_type_as",
+      "line": 222,
+      "native": "torch.ops.aten.type_as",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "source TYPE_AS_SHAPES and default _OTHER_DTYPE pairing",
+      "family": "explicit custom constructor adapter",
+      "cases": 9,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "upsample_bilinear2d_backward": {
+      "source_file": "benchmark/test_upsample_bilinear2d_backward.py",
+      "source_test": "test_upsample_bilinear2d_backward",
+      "line": 200,
+      "native": "torch.ops.aten.upsample_bilinear2d_backward.default",
+      "dtype_expression": "[torch.float32, torch.float64, torch.float16, torch.bfloat16]",
+      "shape_source": "source CASES, original layouts/scales and both align_corners values",
+      "family": "explicit custom constructor adapter",
+      "cases": 26,
+      "dtypes": [
+        "torch.float32",
+        "torch.float64",
+        "torch.float16",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "transform_bias_rescale_qkv": {
+      "source_file": "benchmark/test_transform_bias_rescale_qkv.py",
+      "source_test": "test__transform_bias_rescale_qkv",
+      "line": 68,
+      "native": "torch_op",
+      "dtype_expression": "[torch.float16, torch.float32, torch.bfloat16]",
+      "shape_source": "source custom_shapes passed to constructor",
+      "family": "explicit custom constructor adapter",
+      "cases": 6,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "mixed_dtypes_linear": {
+      "source_file": "benchmark/test_mixed_dtypes_linear.py",
+      "source_test": "test_mixed_dtypes_linear",
+      "line": 128,
+      "native": "mixed_dtypes_linear_torch",
+      "dtype_expression": "FP16_BF16_DTYPES",
+      "shape_source": "source MIXED_DTYPES_LINEAR_SHAPES and FP16/BF16 dtypes",
+      "family": "explicit custom constructor adapter",
+      "cases": 10,
+      "dtypes": [
+        "torch.float16",
+        "torch.bfloat16"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "upsample_lanczos2d_aa_backward_grad_input": {
+      "source_file": "benchmark/test_upsample_lanczos2d_aa_backward.py",
+      "source_test": "test_upsample_lanczos2d_aa_backward_grad_input",
+      "line": 168,
+      "native": "_composite_reference_out",
+      "dtype_expression": "[torch.float16, torch.float32]",
+      "shape_source": "fixed source constructor _configs",
+      "family": "explicit custom constructor adapter",
+      "cases": 4,
+      "dtypes": [
+        "torch.float16",
+        "torch.float32"
+      ],
+      "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
     }
   },
   "validation": {
