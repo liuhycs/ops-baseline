@@ -15,7 +15,7 @@
 
 """topk: PyTorch native baseline from FlagGems kernelgen-dev.
 Source commit: 9d57a23b4386bd669152a935fe88a96db907da7c
-Benchmark: benchmark/test_topk.py:119 (test_topk)
+Benchmark: benchmark/test_topk.py:127 (test_topk)
 Native expression: torch.topk
 Input construction: upstream benchmark helpers/base class, CORE only.
 Shape source: benchmark/core_shapes.yaml benchmark class/default descriptors or explicit class descriptors.
@@ -27,21 +27,27 @@ import torch
 from _kernelgen import export_contract
 
 
-def _ascend_input_fn(shape, dtype, device):
-    if isinstance(shape[0], (tuple, list)):
+def _input_fn(shape, dtype, device):
+    if len(shape) == 2 and isinstance(shape[0], (tuple, list)):
         x_shape, k = shape
+        x = torch.randn(x_shape, device=device, dtype=dtype)
+        yield ({"x": x, "k": k, "dim": -1},)
+    elif len(shape) == 3:
+        m, n, k = shape
+        x = torch.randn((m, n), device=device, dtype=dtype)
+        yield ({"x": x, "k": k, "dim": -1},)
     else:
-        x_shape, k = (shape, 5 if shape[-1] > 5 else shape[-1])
-    x = torch.randn(x_shape, device=device, dtype=dtype)
-    yield ({"x": x, "k": k},)
+        x = torch.randn(shape, device=device, dtype=dtype)
+        k = 5 if shape[-1] > 5 else shape[-1]
+        yield ({"x": x, "k": k, "dim": -1},)
 
 
 def _resolve_native():
     return torch.topk
 
 
-DTYPES = [torch.float32]
+DTYPES = [torch.float16, torch.float32, torch.bfloat16]
 
-_inputs = _ascend_input_fn
+_inputs = _input_fn
 
 globals().update(export_contract("topk", DTYPES, _resolve_native, _inputs))

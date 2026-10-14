@@ -32,6 +32,7 @@ from _kernelgen import (
 )
 
 _DTYPES = [torch.float32]
+_DTYPES.extend([torch.float64])  # Pinned NVIDIA capabilities.
 
 
 def _case_fn(shape, dtype):

@@ -371,8 +371,10 @@
       "family": "OperatorBenchmark",
       "cases": 11,
       "dtypes": [
-        "torch.float32"
-      ]
+        "torch.float32",
+        "torch.float64"
+      ],
+      "source_backend": "nvidia"
     },
     "_sparse_mm": {
       "source_file": "benchmark/test__sparse_mm.py",
@@ -384,8 +386,10 @@
       "family": "OperatorBenchmark",
       "cases": 5,
       "dtypes": [
-        "torch.float32"
-      ]
+        "torch.float32",
+        "torch.float64"
+      ],
+      "source_backend": "nvidia"
     },
     "_sparse_semi_structured_apply": {
       "source_file": "benchmark/test__sparse_semi_structured_apply.py",
@@ -441,8 +445,10 @@
       "dtypes": [
         "torch.float16",
         "torch.float32",
-        "torch.bfloat16"
-      ]
+        "torch.bfloat16",
+        "torch.float64"
+      ],
+      "source_backend": "nvidia"
     },
     "_to_sparse_csr": {
       "source_file": "benchmark/test__to_sparse_csr.py",
@@ -484,8 +490,10 @@
       "family": "OperatorBenchmark",
       "cases": 10,
       "dtypes": [
-        "torch.int32"
-      ]
+        "torch.int32",
+        "torch.int64"
+      ],
+      "source_backend": "nvidia"
     },
     "_validate_sparse_bsc_tensor_args": {
       "source_file": "benchmark/test__validate_sparse_bsc_tensor_args.py",
@@ -510,11 +518,15 @@
       "dtype_expression": "BENCH_VALUES_DTYPES",
       "shape_source": "benchmark class/default descriptors",
       "family": "OperatorBenchmark",
-      "cases": 48,
+      "cases": 96,
       "dtypes": [
         "torch.float32",
-        "torch.float16"
-      ]
+        "torch.float16",
+        "torch.bfloat16",
+        "torch.float64",
+        "torch.float8_e4m3fn"
+      ],
+      "source_backend": "nvidia"
     },
     "_weight_norm": {
       "source_file": "benchmark/test__weight_norm.py",
@@ -2873,8 +2885,10 @@
       "cases": 14,
       "dtypes": [
         "torch.float32",
-        "torch.float16"
-      ]
+        "torch.float16",
+        "torch.bfloat16"
+      ],
+      "source_backend": "nvidia"
     },
     "cudnn_convolution_transpose": {
       "source_file": "benchmark/test_cudnn_convolution_transpose.py",
@@ -3689,8 +3703,16 @@
       "family": "OperatorBenchmark",
       "cases": 35,
       "dtypes": [
-        "torch.float32"
-      ]
+        "torch.float32",
+        "torch.float64"
+      ],
+      "source_op": "fft_rfft",
+      "source_dtype_partition": [
+        "torch.float32",
+        "torch.float64"
+      ],
+      "adaptation": "Separate FP16 grid preserves the source power-of-two transform filter; combined modules cover NVIDIA source dtypes.",
+      "source_backend": "nvidia"
     },
     "fix": {
       "source_file": "benchmark/test_fix.py",
@@ -4192,8 +4214,10 @@
       "cases": 9,
       "dtypes": [
         "torch.float16",
-        "torch.float32"
-      ]
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "source_backend": "nvidia"
     },
     "glu": {
       "source_file": "benchmark/test_glu.py",
@@ -5536,8 +5560,10 @@
       "dtypes": [
         "torch.float32",
         "torch.float64",
-        "torch.complex64"
-      ]
+        "torch.complex64",
+        "torch.complex128"
+      ],
+      "source_backend": "nvidia"
     },
     "linalg_matmul": {
       "source_file": "benchmark/test_linalg_matmul.py",
@@ -5607,8 +5633,10 @@
       "family": "base.Benchmark",
       "cases": 41,
       "dtypes": [
-        "torch.float32"
-      ]
+        "torch.float32",
+        "torch.float64"
+      ],
+      "source_backend": "nvidia"
     },
     "linalg_pinv": {
       "source_file": "benchmark/test_linalg_pinv.py",
@@ -5672,8 +5700,10 @@
       "family": "base.Benchmark",
       "cases": 14,
       "dtypes": [
-        "torch.float32"
-      ]
+        "torch.float32",
+        "torch.float64"
+      ],
+      "source_backend": "nvidia"
     },
     "linalg_svd": {
       "source_file": "benchmark/test_linalg_svd.py",
@@ -5737,8 +5767,10 @@
       "family": "base.Benchmark",
       "cases": 19,
       "dtypes": [
-        "torch.float32"
-      ]
+        "torch.float32",
+        "torch.float64"
+      ],
+      "source_backend": "nvidia"
     },
     "linalg_vecdot_out": {
       "source_file": "benchmark/test_linalg_vecdot.py",
@@ -5750,8 +5782,10 @@
       "family": "base.Benchmark",
       "cases": 19,
       "dtypes": [
-        "torch.float32"
-      ]
+        "torch.float32",
+        "torch.float64"
+      ],
+      "source_backend": "nvidia"
     },
     "linear": {
       "source_file": "benchmark/test_linear.py",
@@ -6901,8 +6935,11 @@
       "cases": 18,
       "dtypes": [
         "torch.float32",
-        "torch.float16"
-      ]
+        "torch.float16",
+        "torch.bfloat16",
+        "torch.float64"
+      ],
+      "source_backend": "nvidia"
     },
     "multiply": {
       "source_file": "benchmark/test_multiply.py",
@@ -9999,8 +10036,10 @@
       "family": "OperatorBenchmark",
       "cases": 9,
       "dtypes": [
-        "torch.float32"
-      ]
+        "torch.float32",
+        "torch.float64"
+      ],
+      "source_backend": "nvidia"
     },
     "special_scaled_modified_bessel_k1": {
       "source_file": "benchmark/test_special_scaled_modified_bessel_k1.py",
@@ -10489,8 +10528,10 @@
       "dtypes": [
         "torch.float16",
         "torch.float32",
-        "torch.bfloat16"
-      ]
+        "torch.bfloat16",
+        "torch.float64"
+      ],
+      "source_backend": "nvidia"
     },
     "thnn_fused_gru_cell": {
       "source_file": "benchmark/test_thnn_fused_gru_cell.py",
@@ -10504,8 +10545,10 @@
       "dtypes": [
         "torch.float16",
         "torch.float32",
-        "torch.bfloat16"
-      ]
+        "torch.bfloat16",
+        "torch.float64"
+      ],
+      "source_backend": "nvidia"
     },
     "thnn_fused_lstm_cell": {
       "source_file": "benchmark/test_thnn_fused_lstm_cell.py",
@@ -10618,15 +10661,18 @@
     "topk": {
       "source_file": "benchmark/test_topk.py",
       "source_test": "test_topk",
-      "line": 119,
+      "line": 127,
       "native": "torch.topk",
-      "dtype_expression": "[torch.float32]",
-      "shape_source": "benchmark class/default descriptors",
+      "dtype_expression": "consts.FLOAT_DTYPES",
+      "shape_source": "NVIDIA TopKBenchmark.set_shapes (non-Ascend branch)",
       "family": "base.GenericBenchmark2DOnly",
-      "cases": 32,
+      "cases": 14,
       "dtypes": [
-        "torch.float32"
-      ]
+        "torch.float16",
+        "torch.float32",
+        "torch.bfloat16"
+      ],
+      "source_backend": "nvidia"
     },
     "trapz": {
       "source_file": "benchmark/test_trapz.py",
@@ -12103,6 +12149,25 @@
         "torch.float32"
       ],
       "constructor_review": "Only the input/shape-affecting state is retained; benchmark reporting and gems setup are omitted."
+    },
+    "fft_rfft_float16": {
+      "source_file": "benchmark/test_fft_rfft.py",
+      "source_test": "test_fft_rfft",
+      "line": 175,
+      "native": "torch.ops.aten.fft_rfft",
+      "dtype_expression": "_RFFT_DTYPES",
+      "shape_source": "benchmark class/default descriptors",
+      "family": "OperatorBenchmark",
+      "cases": 28,
+      "dtypes": [
+        "torch.float16"
+      ],
+      "source_op": "fft_rfft",
+      "source_dtype_partition": [
+        "torch.float16"
+      ],
+      "adaptation": "Separate FP16 grid preserves the source power-of-two transform filter; combined modules cover NVIDIA source dtypes.",
+      "source_backend": "nvidia"
     }
   },
   "validation": {

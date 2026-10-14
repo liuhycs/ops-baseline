@@ -4,8 +4,10 @@
 
 import importlib.util
 import json
+import os
 import random
 import subprocess
+import tempfile
 from pathlib import Path
 import sys
 import unittest
@@ -15,7 +17,11 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 OPS = ROOT / "ops/pytorch"
 sys.path.insert(0, str(OPS))
-from _kernelgen import generate_tensor_input, unpack_inputs, repeat_interleave_repeats  # noqa: E402
+from _kernelgen import (
+    generate_tensor_input,
+    unpack_inputs,
+    repeat_interleave_repeats,
+)  # noqa: E402
 
 
 def describe(value):
@@ -39,18 +45,56 @@ def describe(value):
 
 
 class PytorchCatalogTests(unittest.TestCase):
+    @unittest.skipUnless(
+        os.environ.get("FLAGGEMS_SOURCE_REPO"),
+        "Set FLAGGEMS_SOURCE_REPO for pinned source integration",
+    )
+    def test_nvidia_cases_match_pinned_source(self):
+        names = [
+            name
+            for name, info in self.manifest["operators"].items()
+            if info.get("source_backend") == "nvidia"
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "tools/compare_pytorch_source_cases.py"),
+                    "--source-repo",
+                    os.environ["FLAGGEMS_SOURCE_REPO"],
+                    "--ops",
+                    ",".join(names),
+                    "--output",
+                    str(Path(directory) / "comparison.json"),
+                ],
+                check=True,
+            )
+
+    def test_half_fft_retains_only_source_power_of_two_transforms(self):
+        full = self.modules["fft_rfft"]
+        half = self.modules["fft_rfft_float16"]
+        self.assertEqual(half.DTYPES, [torch.float16])
+        self.assertEqual(full.DTYPES, [torch.float32, torch.float64])
+        for binding in half.grid():
+            args, kwargs = half.build_inputs(binding, torch.float16, "meta")
+            length = kwargs.get("n", args[0].shape[kwargs.get("dim", -1)])
+            self.assertGreater(length, 0)
+            self.assertEqual(length & (length - 1), 0)
+
     def test_repeat_interleave_repeats_preserve_rng_and_source_contract(self):
         for name in ("repeat_interleave_tensor", "repeat_interleave_self_tensor"):
             for binding in self.modules[name].grid():
                 state = torch.random.get_rng_state()
-                repeats = repeat_interleave_repeats(binding["shape"], torch.int32, "cpu")
+                repeats = repeat_interleave_repeats(
+                    binding["shape"], torch.int32, "cpu"
+                )
                 self.assertTrue(torch.equal(state, torch.random.get_rng_state()))
                 self.assertEqual(repeats.dtype, torch.int64)
                 self.assertEqual(list(repeats.shape), [binding["shape"][0]])
                 self.assertTrue(bool(((repeats >= 0) & (repeats < 31)).all()))
 
     def test_repeat_interleave_workload_replays_across_processes(self):
-        script = '''
+        script = """
 import torch, sys, json, importlib
 sys.path.insert(0, sys.argv[1])
 torch.manual_seed(int(sys.argv[2]))
@@ -62,11 +106,13 @@ for name in ("repeat_interleave_tensor", "repeat_interleave_self_tensor"):
     output = module.native()(*args, **kwargs)
     result[name] = [repeats.tolist(), list(output.shape)]
 print(json.dumps(result))
-'''
+"""
         outputs = [
-            json.loads(subprocess.check_output(
-                [sys.executable, "-c", script, str(OPS), str(seed)], text=True
-            ))
+            json.loads(
+                subprocess.check_output(
+                    [sys.executable, "-c", script, str(OPS), str(seed)], text=True
+                )
+            )
             for seed in (123, 456)
         ]
         self.assertEqual(outputs[0], outputs[1])

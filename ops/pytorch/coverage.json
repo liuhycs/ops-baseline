@@ -9,9 +9,9 @@
     "named_benchmark_constructors": 1805,
     "unique_benchmark_names": 1694,
     "operator_config_ids": 1443,
-    "added_operators": 810,
+    "added_operators": 811,
     "existing_silu": 1,
-    "added_descriptors": 5161,
+    "added_descriptors": 5219,
     "pending_records": 1087,
     "pending_categories": {
       "custom_input_or_state": 394,
@@ -44,6 +44,35 @@
       ],
       "torch.bfloat16": [
         "RuntimeError: \"svd_cuda_gesvdjBatched\" not implemented for 'BFloat16'"
+      ]
+    },
+    "conj_physical": {
+      "torch.bfloat16": [
+        "Real-valued conjugation returns the input with no CUDA compute kernel; confirmed on H20."
+      ],
+      "torch.float16": [
+        "Real-valued conjugation returns the input with no CUDA compute kernel; confirmed on H20."
+      ],
+      "torch.float32": [
+        "Real-valued conjugation returns the input with no CUDA compute kernel; confirmed on H20."
+      ],
+      "torch.float8_e4m3fn": [
+        "Real-valued conjugation returns the input with no CUDA compute kernel; confirmed on H20."
+      ],
+      "torch.float8_e5m2": [
+        "Real-valued conjugation returns the input with no CUDA compute kernel; confirmed on H20."
+      ],
+      "torch.int16": [
+        "Real-valued conjugation returns the input with no CUDA compute kernel; confirmed on H20."
+      ],
+      "torch.int32": [
+        "Real-valued conjugation returns the input with no CUDA compute kernel; confirmed on H20."
+      ],
+      "torch.int8": [
+        "Real-valued conjugation returns the input with no CUDA compute kernel; confirmed on H20."
+      ],
+      "torch.uint8": [
+        "Real-valued conjugation returns the input with no CUDA compute kernel; confirmed on H20."
       ]
     }
   },
@@ -10548,5 +10577,17 @@
         ]
       }
     ]
+  },
+  "source_adaptations": {
+    "constant_pad_nd": "Random scalar call parameters use a stable per-case seed for config/latency/NCU replay; upstream draws them from ambient RNG.",
+    "count_nonzero": "Random scalar call parameters use a stable per-case seed for config/latency/NCU replay; upstream draws them from ambient RNG.",
+    "diag": "Random scalar call parameters use a stable per-case seed for config/latency/NCU replay; upstream draws them from ambient RNG.",
+    "index_select_backward": "Random scalar call parameters use a stable per-case seed for config/latency/NCU replay; upstream draws them from ambient RNG.",
+    "linspace": "Random scalar call parameters use a stable per-case seed for config/latency/NCU replay; upstream draws them from ambient RNG.",
+    "pad": "Random scalar call parameters use a stable per-case seed for config/latency/NCU replay; upstream draws them from ambient RNG.",
+    "select_scatter": "Random scalar call parameters use a stable per-case seed for config/latency/NCU replay; upstream draws them from ambient RNG.",
+    "weight_norm_differentiable_backward": "FP16 meta saved_norms cast to float32 to match Torch 2.8 actual CUDA input metadata.",
+    "_cast_Int": "int32 source lane excluded because it emits no CUDA compute kernel.",
+    "conj_physical": "Non-complex source lanes excluded: conjugation is a no-op and emits no CUDA compute kernel."
   }
 }

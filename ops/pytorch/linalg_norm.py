@@ -29,6 +29,7 @@ from _kernelgen import generate_tensor_input, export_contract
 VENDOR = "nvidia"
 
 DTYPES = [torch.float32]
+DTYPES.extend([torch.float64])  # Pinned NVIDIA capabilities.
 
 SHAPE = [
     (1024,),

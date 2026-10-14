@@ -29,6 +29,7 @@ from _kernelgen import BenchmarkCasePlan, case_inputs, export_contract
 _REDUCTIONS = [0, 1, 2]
 
 _DTYPES = [torch.float32, torch.float16]
+_DTYPES.extend([torch.bfloat16, torch.float64])  # Pinned NVIDIA capabilities.
 
 
 def _descriptor_dims(shape):

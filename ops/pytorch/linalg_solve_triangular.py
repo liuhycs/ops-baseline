@@ -27,6 +27,7 @@ import torch
 from _kernelgen import export_contract
 
 SOLVE_TRI_DTYPES = [torch.float32]
+SOLVE_TRI_DTYPES.extend([torch.float64])  # Pinned NVIDIA capabilities.
 
 
 def _make_triangular_input(n, k, dtype, device, upper):

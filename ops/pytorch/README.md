@@ -25,7 +25,7 @@ PyTorch 官方算子（`torch.*` / `torch.nn.functional.*` / `torch.ops.aten.*`�
 
 ## kernelgen-dev 扩充集合
 
-固定来源：[FlagGems kernelgen-dev `9d57a23b4386bd669152a935fe88a96db907da7c`](https://github.com/flagos-ai/FlagGems/tree/9d57a23b4386bd669152a935fe88a96db907da7c)。新增 810 个模块，加上原有 `silu` 共 811 个算子。来源涵盖 pointwise、reduction、BLAS、索引、归一化、池化、卷积、RNN、FFT、linalg、部分稀疏接口和明确的原生 backward API。
+固定来源：[FlagGems kernelgen-dev `9d57a23b4386bd669152a935fe88a96db907da7c`](https://github.com/flagos-ai/FlagGems/tree/9d57a23b4386bd669152a935fe88a96db907da7c)。新增 811 个模块，加上原有 `silu` 共 812 个模块（FP16 FFT 单列）。来源涵盖 pointwise、reduction、BLAS、索引、归一化、池化、卷积、RNN、FFT、linalg、部分稀疏接口和明确的原生 backward API。
 
 - `_kernelgen/manifest.json` 逐算子记录原生表达式、benchmark 测试函数/行号、shape 来源、dtype 和采集点数量。
 - `_kernelgen/cases.json` 保存从源输入构造枚举出的描述符、调用变体和各 dtype 的输入元数据，不保存张量数据。
@@ -72,3 +72,22 @@ python3 tools/validate_pytorch_ops.py --device 0 \
 新增的 concat/cat/stack 家族保留来源 shape 和 `MAX_ELEMENTS` 过滤；einsum 保留矩阵与批矩阵两个方程；multi-margin-loss 家族保留 p、weighted、reduction 的全部 12 种组合及输出/梯度缓冲区形状。`convert_weight_to_int4pack` 只使用配对输入工厂中的 native 参数，与来源 `_run_metric` 相同。
 
 `to_copy` 的多个源 dtype 使用 `to_copy_from_float32` 等 7 个身份区分，DTYPES 仍表示实际目标 dtype，完整转换对沿用来源循环；`type_as` 沿用来源默认 shape 和不同 dtype 的配对。这些分组方式避免覆盖或误标多个同名构造函数的配置。
+
+### NVIDIA 来源集合比对
+
+按固定来源的 NVIDIA VendorDescriptor 能力和 CORE 档位选取输入。`topk` 使用 NVIDIA 的 14 个 shape 和 FP16/FP32/BF16，不再使用 Ascend 的 32 个 FP32 cases。capability 控制的 BF16/FP64/complex128/int64/FP8 组合保留在对应模块中；CSR 验证包含 int32 和 int64 索引。
+
+`fft_rfft` 保留 FP32/FP64 的完整 case；`fft_rfft_float16` 单列 FP16 的 power-of-two 子集（28 个 case）。这是因为当前采集契约对每个 shape 遍历全部 DTYPES，两种 grid 不能直接混为一个矩形集合。两模块合起来覆盖 NVIDIA 来源的 RFFT 类型和 case，manifest 记录 `source_op` 与 `source_dtype_partition`。
+
+以下工具从本地 FlagGems git 仓库导出 manifest 固定提交，不切换其工作区。工具使用源码的 VendorDescriptor、benchmark 构造函数、CORE shape 选择和输入迭代器；只替换候选后端和计时集成，并用 meta 张量比较输入结构多重集合。需安装 Torch、pytest 和 PyYAML；不需要安装 FlagGems。
+
+```bash
+python3 tools/compare_pytorch_source_cases.py \
+  --source-repo /path/to/FlagGems --output /tmp/source_parity.json
+
+# 把本轮修复的 NVIDIA 来源比对纳入测试（不设置时该集成测试跳过）
+FLAGGEMS_SOURCE_REPO=/path/to/FlagGems \
+  PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
+```
+
+`--ops topk,ger` 可缩小比较范围。发现任何差异或构造错误时退出码为 1，不会静默放过已知适配。全目录仍有 10 个模块的有意差异：7 个随机标量参数固定的模块、weight-norm FP16 saved-norm 的 meta/CUDA dtype 对齐，以及 `_cast_Int` / `conj_physical` 的 no-op 类型排除。具体说明见 `coverage.json.source_adaptations`。因此不将全目录描述为与来源完全一致；结构相同也不代表全部 case 已完成数值或 CUDA/NCU 验证。

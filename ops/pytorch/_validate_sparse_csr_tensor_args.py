@@ -26,9 +26,10 @@ import torch
 
 from _kernelgen import BenchmarkCasePlan, case_inputs, export_contract
 
-BENCH_INDEX_DTYPES = [torch.int32]
+BENCH_INDEX_DTYPES = [torch.int32, torch.int64]
 
 BENCH_VALUES_DTYPES = [torch.float32, torch.float16]
+BENCH_VALUES_DTYPES.extend([torch.bfloat16, torch.float64, torch.float8_e4m3fn])  # Pinned NVIDIA capabilities.
 
 
 def _require_dim(value):

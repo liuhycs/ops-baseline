@@ -31,6 +31,7 @@ import itertools
 import numbers
 
 _INDEX_DTYPES = [torch.int32]
+_INDEX_DTYPES.extend([torch.int64])  # Pinned NVIDIA capabilities.
 
 
 def _row_lengths(cdim):

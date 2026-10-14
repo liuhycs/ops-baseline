@@ -27,6 +27,7 @@ import torch
 from _kernelgen import export_contract
 
 LDL_SOLVE_DTYPES = [torch.float32, torch.float64, torch.complex64]
+LDL_SOLVE_DTYPES.extend([torch.complex128])  # Pinned NVIDIA capabilities.
 
 
 def _make_ldl_inputs(n, k, dtype, device):

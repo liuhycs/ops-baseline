@@ -32,6 +32,7 @@ from _kernelgen import (
 )
 
 BENCH_DTYPES = [torch.float32]
+BENCH_DTYPES.extend([torch.float64])  # Pinned NVIDIA capabilities.
 
 
 def _resolve_descriptor(rows, inner, cols, nnz_per_row):

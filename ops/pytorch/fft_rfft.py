@@ -27,6 +27,7 @@ import torch
 from _kernelgen import BenchmarkCasePlan, case_inputs, export_contract
 
 _RFFT_DTYPES = [torch.float32]
+_RFFT_DTYPES.extend([torch.float64])  # Pinned NVIDIA capabilities.
 
 
 def _is_power_of_two(value):

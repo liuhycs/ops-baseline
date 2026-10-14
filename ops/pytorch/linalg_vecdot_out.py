@@ -27,6 +27,7 @@ import torch
 from _kernelgen import export_contract
 
 DTYPES = [torch.float32]
+DTYPES.extend([torch.float64])  # Pinned NVIDIA capabilities.
 
 
 def _input_iter(shape, dtype, device):

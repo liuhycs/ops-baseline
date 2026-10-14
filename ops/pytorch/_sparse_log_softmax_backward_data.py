@@ -29,6 +29,7 @@ from _kernelgen import BenchmarkCasePlan, case_inputs, export_contract
 import math
 
 _DTYPES = [torch.float32]
+_DTYPES.extend([torch.float64])  # Pinned NVIDIA capabilities.
 
 
 def _plan_fields(entry):
