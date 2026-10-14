@@ -1,0 +1,45 @@
+# Copyright 2026 FlagOS Contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+"""div_out: PyTorch native baseline from FlagGems kernelgen-dev.
+Source commit: 9d57a23b4386bd669152a935fe88a96db907da7c
+Benchmark: benchmark/test_div.py:163 (test_div_out)
+Native expression: torch.div
+Input construction: upstream benchmark helpers/base class, CORE only.
+Shape source: benchmark/core_shapes.yaml Benchmark or explicit class descriptors.
+Comprehensive-only shapes are not imported.
+"""
+
+import torch
+
+from _kernelgen import generate_tensor_input, export_contract
+
+
+def input_fn(shape, dtype, device):
+    inp1 = generate_tensor_input(shape, dtype, device)
+    inp2 = generate_tensor_input(shape, dtype, device)
+    out = torch.empty_like(inp1)
+    yield (inp1, inp2, {"out": out})
+
+
+def _resolve_native():
+    return torch.div
+
+
+DTYPES = [torch.float16, torch.float32, torch.bfloat16]
+
+_inputs = input_fn
+
+globals().update(export_contract("div_out", DTYPES, _resolve_native, _inputs))

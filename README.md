@@ -28,6 +28,7 @@ python tools/collect_baseline_nvidia.py --report-dir ncu_reports
 # Select the op source repo: scans ops/<repo>/ (default vllm)
 python tools/collect_baseline_nvidia.py --repo vllm
 python tools/collect_baseline_nvidia.py --repo sglang
+python tools/collect_baseline_nvidia.py --repo pytorch --ops mm,layer_norm
 
 # Only run specific ops (comma-separated, or a file of op names)
 python tools/collect_baseline_nvidia.py --ops moe_sum,add_rms_norm
@@ -37,6 +38,8 @@ python tools/collect_baseline_nvidia.py --check --repo vllm
 ```
 
 Requires: CUDA GPU, `vllm`, `triton`, `ncu` (Nsight Compute). The collector scans `ops/<repo>/` (chosen by `--repo`, default `vllm`), falling back to `baseline_shape.yaml`; on name clashes, the op module wins.
+
+See [ops/pytorch/README.md](ops/pytorch/README.md) for the pinned FlagGems kernelgen-dev PyTorch baseline catalog, source/shape conventions, validation, and deferred operators.
 
 ## Adding an operator
 
