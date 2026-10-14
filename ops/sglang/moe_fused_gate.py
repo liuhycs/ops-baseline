@@ -81,3 +81,37 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["m"], binding["n"], binding["topk"]]
+
+
+def config(binding, dtype):
+    m, n, topk, nfse, neg, tkg = (
+        binding["m"], binding["n"], binding["topk"],
+        binding["nfse"], binding["neg"], binding["tkg"],
+    )
+    dt = str(dtype)
+    # kernel 输出每 token top-(topk+num_fused_shared_experts) 的权重与索引。
+    out_k = topk + nfse
+    return {
+        "inputs": {
+            "scores": {"shape": [m, n], "dtype": dt},
+            "bias": {"shape": [n], "dtype": "torch.float32"},
+            "topk": {"scalar": topk},
+            "scoring_func": {"scalar": "sigmoid"},
+            "num_fused_shared_experts": {"scalar": nfse},
+            "renormalize": {"scalar": True},
+            "routed_scaling_factor": {"scalar": 1.0},
+            "apply_routed_scaling_factor_on_output": {"scalar": False},
+            "moe_softcapping": {"scalar": 0.0},
+            "num_expert_group": {"scalar": neg},
+            "topk_group": {"scalar": tkg},
+        },
+        "outputs": {
+            "topk_weights": {"shape": [m, out_k], "dtype": "torch.float32"},
+            "topk_ids": {"shape": [m, out_k], "dtype": "torch.int32"},
+        },
+        "dims": {
+            "m": m, "n": n, "topk": topk,
+            "num_fused_shared_experts": nfse,
+            "num_expert_group": neg, "topk_group": tkg,
+        },
+    }

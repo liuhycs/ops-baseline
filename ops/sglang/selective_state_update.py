@@ -118,3 +118,37 @@ def key_shape(binding):
         f"b{binding['batch']}_nh{binding['nheads']}_dim{binding['dim']}"
         f"_ds{binding['dstate']}_ng{binding['ngroups']}"
     )
+
+
+def config(binding, dtype):
+    batch = binding["batch"]
+    nheads = binding["nheads"]
+    dim = binding["dim"]
+    dstate = binding["dstate"]
+    ngroups = binding["ngroups"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "state": {"shape": [batch, nheads, dim, dstate], "dtype": dt,
+                      "note": "原地更新"},
+            "x": {"shape": [batch, nheads, dim], "dtype": dt},
+            "dt": {"shape": [batch, nheads, dim], "dtype": dt},
+            "A": {"shape": [nheads, dim, dstate], "dtype": "torch.float32"},
+            "B": {"shape": [batch, ngroups, dstate], "dtype": dt},
+            "C": {"shape": [batch, ngroups, dstate], "dtype": dt},
+            "D": {"shape": [nheads, dim], "dtype": "torch.float32"},
+            "z": {"shape": [batch, nheads, dim], "dtype": dt},
+            "dt_bias": {"shape": [nheads, dim], "dtype": "torch.float32"},
+            "dt_softplus": {"scalar": True},
+            "out": {"shape": [batch, nheads, dim], "dtype": dt, "note": "原地写回"},
+        },
+        "outputs": {
+            "out": {"shape": [batch, nheads, dim], "dtype": dt},
+            "state": {"shape": [batch, nheads, dim, dstate], "dtype": dt,
+                      "note": "原地更新后的 state"},
+        },
+        "dims": {
+            "batch": batch, "nheads": nheads, "dim": dim,
+            "dstate": dstate, "ngroups": ngroups,
+        },
+    }

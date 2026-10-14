@@ -61,3 +61,18 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["bs"], 2 * binding["d"]]
+
+
+def config(binding, dtype):
+    bs, d = binding["bs"], binding["d"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "hidden_states": {"shape": [bs, 2 * d], "dtype": dt,
+                              "note": "前半 gate / 后半 up"},
+        },
+        "outputs": {
+            "out": {"shape": [bs, d], "dtype": dt},
+        },
+        "dims": {"bs": bs, "d": d},
+    }

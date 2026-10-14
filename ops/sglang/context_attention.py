@@ -87,3 +87,30 @@ def key_shape(binding):
         binding["num_heads"],
         binding["head_dim"],
     )
+
+
+def config(binding, dtype):
+    bs, sl = binding["bs"], binding["seq_len"]
+    num_heads, head_dim = binding["num_heads"], binding["head_dim"]
+    total = sl * bs
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "q": {"shape": [total, num_heads, head_dim], "dtype": dt},
+            "k": {"shape": [total, num_heads, head_dim], "dtype": dt},
+            "v": {"shape": [total, num_heads, head_dim], "dtype": dt},
+            "o": {"shape": [total, num_heads, head_dim], "dtype": dt,
+                  "note": "原地写回"},
+            "b_start_loc": {"shape": [bs], "dtype": "torch.int32"},
+            "b_seq_len": {"shape": [bs], "dtype": "torch.int32"},
+            "max_input_len": {"scalar": sl},
+            "is_causal": {"scalar": True},
+        },
+        "outputs": {
+            "o": {"shape": [total, num_heads, head_dim], "dtype": dt},
+        },
+        "dims": {
+            "bs": bs, "seq_len": sl, "total_tokens": total,
+            "num_heads": num_heads, "head_dim": head_dim,
+        },
+    }

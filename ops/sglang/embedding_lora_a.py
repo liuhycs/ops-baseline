@@ -81,3 +81,29 @@ def build_inputs(binding, dtype, device):
 def key_shape(binding):
     s = sum(binding["seg_lens"])
     return f"s{s}_L{binding['num_lora']}_r{binding['r']}_V{binding['vocab_size']}"
+
+
+def config(binding, dtype):
+    seg_lens = binding["seg_lens"]
+    num_lora, r, vocab_size = (
+        binding["num_lora"], binding["r"], binding["vocab_size"],
+    )
+    s = sum(seg_lens)
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "input_ids": {"shape": [s], "dtype": "torch.int64"},
+            "weights": {"shape": [num_lora, r, vocab_size], "dtype": dt},
+            "batch_info": {"note": "LoRABatchInfo（seg_indptr/weight_indices/"
+                           "lora_ranks/scalings 等 LoRA 分段路由 metadata）"},
+            "vocab_size": {"scalar": vocab_size},
+            "extra_embeddings": {"scalar": None},
+        },
+        "outputs": {
+            "output": {"shape": [s, r], "dtype": dt},
+        },
+        "dims": {
+            "seg_lens": list(seg_lens), "s": s,
+            "num_lora": num_lora, "r": r, "vocab_size": vocab_size,
+        },
+    }

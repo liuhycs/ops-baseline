@@ -62,3 +62,18 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["t"], binding["heads"], binding["d"]]
+
+
+def config(binding, dtype):
+    t, heads, d = binding["t"], binding["heads"], binding["d"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [t, heads, d], "dtype": dt},
+            "tau": {"shape": [t], "dtype": "torch.float32", "note": "per-row"},
+        },
+        "outputs": {
+            "out": {"shape": [t, heads, d], "dtype": dt},
+        },
+        "dims": {"t": t, "heads": heads, "d": d},
+    }

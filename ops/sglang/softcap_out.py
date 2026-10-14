@@ -58,3 +58,18 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["m"], binding["n"]]
+
+
+def config(binding, dtype):
+    m, n = binding["m"], binding["n"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [m, n], "dtype": dt},
+            "softcap_const": {"scalar": _SOFTCAP_CONST},
+        },
+        "outputs": {
+            "out": {"shape": [m, n], "dtype": dt},
+        },
+        "dims": {"m": m, "n": n},
+    }

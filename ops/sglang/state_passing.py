@@ -108,3 +108,28 @@ def key_shape(binding):
         f"b{binding['batch']}_nc{binding['nchunks']}_cs{binding['chunk_size']}"
         f"_nh{binding['nheads']}_dim{binding['dim']}"
     )
+
+
+def config(binding, dtype):
+    batch = binding["batch"]
+    nchunks = binding["nchunks"]
+    chunk_size = binding["chunk_size"]
+    nheads = binding["nheads"]
+    dim = binding["dim"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "states": {"shape": [batch, nchunks, nheads, dim], "dtype": dt},
+            "dA_cumsum": {"shape": [batch, nheads, nchunks, chunk_size],
+                          "dtype": "torch.float32"},
+            "initial_states": {"scalar": None},
+        },
+        "outputs": {
+            "out": {"shape": [batch, nchunks, nheads, dim], "dtype": dt},
+            "final_states": {"shape": [batch, nheads, dim], "dtype": "torch.float32"},
+        },
+        "dims": {
+            "batch": batch, "nchunks": nchunks, "chunk_size": chunk_size,
+            "nheads": nheads, "dim": dim,
+        },
+    }

@@ -79,3 +79,32 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return "nt{num_tokens}_qh{n_qh}_kh{n_kh}_hs{head_size}_rd{rotary_dim}".format(**binding)
+
+
+def config(binding, dtype):
+    nt = binding["num_tokens"]
+    n_qh, n_kh = binding["n_qh"], binding["n_kh"]
+    head_size, rotary_dim = binding["head_size"], binding["rotary_dim"]
+    mrope_section = binding["mrope_section"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "q": {"shape": [nt, n_qh * head_size], "dtype": dt, "note": "原地写回"},
+            "k": {"shape": [nt, n_kh * head_size], "dtype": dt, "note": "原地写回"},
+            "cos_sin_cache": {"shape": [_MAX_POS, rotary_dim], "dtype": dt},
+            "positions": {"shape": [3, nt], "dtype": "torch.int64"},
+            "mrope_section": {"scalar": list(mrope_section)},
+            "head_size": {"scalar": head_size},
+            "rotary_dim": {"scalar": rotary_dim},
+            "is_neox_style": {"scalar": True},
+        },
+        "outputs": {
+            "q": {"shape": [nt, n_qh * head_size], "dtype": dt},
+            "k": {"shape": [nt, n_kh * head_size], "dtype": dt},
+        },
+        "dims": {
+            "num_tokens": nt, "n_qh": n_qh, "n_kh": n_kh,
+            "head_size": head_size, "rotary_dim": rotary_dim,
+            "max_pos": _MAX_POS,
+        },
+    }

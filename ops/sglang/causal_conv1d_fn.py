@@ -95,3 +95,33 @@ def key_shape(binding):
         f"nseq{len(seq_lens)}_len{seq_lens[0]}_dim{binding['dim']}"
         f"_w{binding['width']}"
     )
+
+
+def config(binding, dtype):
+    seq_lens = list(binding["seq_lens"])
+    dim = binding["dim"]
+    width = binding["width"]
+    total = sum(seq_lens)
+    batch = len(seq_lens)
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [dim, total], "dtype": dt},
+            "weight": {"shape": [dim, width], "dtype": dt},
+            "bias": {"shape": [dim], "dtype": dt},
+            "conv_states": {"shape": [batch, dim, width - 1], "dtype": dt,
+                            "note": "原地更新（kernel 把尾窗写回）"},
+            "query_start_loc": {"shape": [batch + 1], "dtype": "torch.int32"},
+            "seq_lens_cpu": {"note": "seq_lens python list，长度 batch"},
+            "cache_indices": {"shape": [batch], "dtype": "torch.int32"},
+            "has_initial_state": {"shape": [batch], "dtype": "torch.bool"},
+            "activation": {"scalar": "silu"},
+        },
+        "outputs": {
+            "out": {"shape": [dim, total], "dtype": dt},
+        },
+        "dims": {
+            "seq_lens": seq_lens, "batch": batch, "total": total,
+            "dim": dim, "width": width,
+        },
+    }

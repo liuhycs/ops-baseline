@@ -73,3 +73,31 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["m"], binding["n"]]
+
+
+def config(binding, dtype):
+    m, n = binding["m"], binding["n"]
+    ngroups = n // _GROUP_SIZE
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [m, n], "dtype": dt},
+            "weight": {"shape": [n], "dtype": dt},
+            "bias": {"shape": [n], "dtype": dt},
+            "eps": {"scalar": _EPS},
+            "z": {"shape": [m, n], "dtype": dt},
+            "group_size": {"scalar": _GROUP_SIZE},
+            "norm_before_gate": {"scalar": True},
+            "is_rms_norm": {"scalar": True},
+        },
+        "outputs": {
+            "out": {"shape": [m, n], "dtype": dt},
+            "mean": {"shape": [m * ngroups], "dtype": "torch.float32",
+                     "note": "本题只记 out"},
+            "rstd": {"shape": [m * ngroups], "dtype": "torch.float32",
+                     "note": "本题只记 out"},
+        },
+        "dims": {
+            "m": m, "n": n, "group_size": _GROUP_SIZE, "ngroups": ngroups,
+        },
+    }

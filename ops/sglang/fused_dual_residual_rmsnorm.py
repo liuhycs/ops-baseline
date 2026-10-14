@@ -64,3 +64,23 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["bs"], binding["hidden"]]
+
+
+def config(binding, dtype):
+    bs, hidden = binding["bs"], binding["hidden"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [bs, hidden], "dtype": dt},
+            "residual": {"shape": [bs, hidden], "dtype": dt},
+            "weight1": {"shape": [hidden], "dtype": dt},
+            "weight2": {"shape": [hidden], "dtype": dt},
+            "eps": {"scalar": _EPS},
+            "autotune": {"scalar": False},
+        },
+        "outputs": {
+            "output": {"shape": [bs, hidden], "dtype": dt},
+            "mid": {"shape": [bs, hidden], "dtype": dt},
+        },
+        "dims": {"bs": bs, "hidden": hidden},
+    }

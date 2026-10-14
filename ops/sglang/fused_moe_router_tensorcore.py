@@ -77,3 +77,33 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["bs"], binding["hidden"], binding["num_experts"], binding["topk"]]
+
+
+def config(binding, dtype):
+    bs, hidden, num_experts, topk = (
+        binding["bs"], binding["hidden"], binding["num_experts"], binding["topk"],
+    )
+    dt = str(dtype)
+    block_n = max(16, 1 << (num_experts - 1).bit_length())
+    block_k = min(64, hidden)
+    return {
+        "inputs": {
+            "x": {"shape": [bs, hidden], "dtype": dt},
+            "router_weight": {"shape": [num_experts, hidden], "dtype": dt},
+            "topk": {"scalar": topk},
+            "moe_softcapping": {"scalar": 0.0},
+            "BLOCK_SIZE_M": {"scalar": 16},
+            "BLOCK_SIZE_N": {"scalar": block_n},
+            "BLOCK_SIZE_K": {"scalar": block_k},
+            "correction_bias": {"scalar": None},
+        },
+        "outputs": {
+            "topk_weights": {"shape": [bs, topk], "dtype": "torch.float32"},
+            "topk_ids": {"shape": [bs, topk], "dtype": "torch.int32"},
+        },
+        "dims": {
+            "bs": bs, "hidden": hidden,
+            "num_experts": num_experts, "topk": topk,
+            "BLOCK_SIZE_N": block_n, "BLOCK_SIZE_K": block_k,
+        },
+    }

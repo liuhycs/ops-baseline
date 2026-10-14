@@ -89,3 +89,30 @@ def key_shape(binding):
         f"b{binding['batch']}_nc{binding['nchunks']}_cs{binding['chunk_size']}"
         f"_ng{binding['ngroups']}_k{binding['k']}_causal{int(binding['causal'])}"
     )
+
+
+def config(binding, dtype):
+    batch = binding["batch"]
+    nchunks = binding["nchunks"]
+    chunk_size = binding["chunk_size"]
+    ngroups = binding["ngroups"]
+    k = binding["k"]
+    causal = binding["causal"]
+    seqlen = nchunks * chunk_size
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "a": {"shape": [batch, seqlen, ngroups, k], "dtype": dt},
+            "b": {"shape": [batch, seqlen, ngroups, k], "dtype": dt},
+            "chunk_size": {"scalar": chunk_size},
+            "causal": {"scalar": causal},
+        },
+        "outputs": {
+            "out": {"shape": [batch, nchunks, ngroups, chunk_size, chunk_size],
+                    "dtype": dt},
+        },
+        "dims": {
+            "batch": batch, "nchunks": nchunks, "chunk_size": chunk_size,
+            "seqlen": seqlen, "ngroups": ngroups, "k": k, "causal": causal,
+        },
+    }

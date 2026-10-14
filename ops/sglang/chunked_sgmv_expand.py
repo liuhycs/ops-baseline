@@ -101,3 +101,37 @@ def key_shape(binding):
     s = sum(binding["seg_lens"])
     ss = "x".join(str(z) for z in binding["slice_sizes"])
     return f"s{s}_L{binding['num_lora']}_r{binding['r']}_slc{ss}"
+
+
+def config(binding, dtype):
+    seg_lens = binding["seg_lens"]
+    num_lora, r, slice_sizes = (
+        binding["num_lora"], binding["r"], binding["slice_sizes"],
+    )
+    s = sum(seg_lens)
+    n_slices = len(slice_sizes)
+    output_dim = sum(slice_sizes)
+    max_slice_size = max(slice_sizes)
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [s, n_slices * r], "dtype": dt},
+            "weights": {"shape": [num_lora, output_dim, r], "dtype": dt},
+            "batch_info": {"note": "LoRABatchInfo（seg_indptr/weight_indices/"
+                           "lora_ranks/scalings 等 LoRA 分段路由 metadata）"},
+            "slice_offsets": {"shape": [n_slices + 1], "dtype": "torch.int32",
+                              "note": "slice_sizes 的前缀和偏移"},
+            "max_slice_size": {"scalar": max_slice_size},
+            "base_output": {"shape": [s, output_dim], "dtype": dt,
+                            "note": "原地写回"},
+        },
+        "outputs": {
+            "base_output": {"shape": [s, output_dim], "dtype": dt},
+        },
+        "dims": {
+            "seg_lens": list(seg_lens), "s": s,
+            "num_lora": num_lora, "r": r,
+            "slice_sizes": list(slice_sizes), "n_slices": n_slices,
+            "output_dim": output_dim, "max_slice_size": max_slice_size,
+        },
+    }

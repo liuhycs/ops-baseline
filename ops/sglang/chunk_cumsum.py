@@ -91,3 +91,36 @@ def key_shape(binding):
         f"b{binding['batch']}_nc{binding['nchunks']}_cs{binding['chunk_size']}"
         f"_nh{binding['nheads']}"
     )
+
+
+def config(binding, dtype):
+    batch = binding["batch"]
+    nchunks = binding["nchunks"]
+    chunk_size = binding["chunk_size"]
+    nheads = binding["nheads"]
+    use_bias = binding["dt_bias"]
+    dt_softplus = binding["dt_softplus"]
+    seqlen = nchunks * chunk_size
+    dt = str(dtype)
+    inputs = {
+        "dt": {"shape": [batch, seqlen, nheads], "dtype": dt},
+        "A": {"shape": [nheads], "dtype": "torch.float32"},
+        "chunk_size": {"scalar": chunk_size},
+        "dt_bias": ({"shape": [nheads], "dtype": "torch.float32"}
+                    if use_bias else {"scalar": None}),
+        "dt_softplus": {"scalar": dt_softplus},
+    }
+    return {
+        "inputs": inputs,
+        "outputs": {
+            "dA_cumsum": {"shape": [batch, nheads, nchunks, chunk_size],
+                          "dtype": "torch.float32"},
+            "dt_out": {"shape": [batch, nheads, nchunks, chunk_size],
+                       "dtype": "torch.float32"},
+        },
+        "dims": {
+            "batch": batch, "nchunks": nchunks, "chunk_size": chunk_size,
+            "seqlen": seqlen, "nheads": nheads,
+            "dt_bias": use_bias, "dt_softplus": dt_softplus,
+        },
+    }

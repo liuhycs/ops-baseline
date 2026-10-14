@@ -84,3 +84,31 @@ def key_shape(binding):
         f"b{binding['batch']}_dim{binding['dim']}_w{binding['width']}"
         f"_sq{binding['seqlen']}"
     )
+
+
+def config(binding, dtype):
+    batch = binding["batch"]
+    dim = binding["dim"]
+    width = binding["width"]
+    seqlen = binding["seqlen"]
+    state_len = width - 1
+    dt = str(dtype)
+    # seqlen==1 时 x 被 squeeze 成 (batch, dim)，否则 (batch, dim, seqlen)。
+    x_shape = [batch, dim] if seqlen == 1 else [batch, dim, seqlen]
+    return {
+        "inputs": {
+            "x": {"shape": x_shape, "dtype": dt},
+            "conv_state": {"shape": [batch, dim, state_len], "dtype": dt,
+                           "note": "原地更新"},
+            "weight": {"shape": [dim, width], "dtype": dt},
+            "bias": {"shape": [dim], "dtype": dt},
+            "activation": {"scalar": "silu"},
+        },
+        "outputs": {
+            "out": {"shape": x_shape, "dtype": dt},
+        },
+        "dims": {
+            "batch": batch, "dim": dim, "width": width, "seqlen": seqlen,
+            "state_len": state_len,
+        },
+    }

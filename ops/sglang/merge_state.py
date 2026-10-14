@@ -76,3 +76,25 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["n_tokens"], binding["num_heads"], binding["head_size"]]
+
+
+def config(binding, dtype):
+    n, num_heads, head_size = (
+        binding["n_tokens"],
+        binding["num_heads"],
+        binding["head_size"],
+    )
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "prefix_output": {"shape": [n, num_heads, head_size], "dtype": dt},
+            "prefix_lse": {"shape": [n, num_heads], "dtype": "torch.float32"},
+            "suffix_output": {"shape": [n, num_heads, head_size], "dtype": dt},
+            "suffix_lse": {"shape": [n, num_heads], "dtype": "torch.float32"},
+        },
+        "outputs": {
+            "output": {"shape": [n, num_heads, head_size], "dtype": dt},
+            "output_lse": {"shape": [n, num_heads], "dtype": "torch.float32"},
+        },
+        "dims": {"n_tokens": n, "num_heads": num_heads, "head_size": head_size},
+    }

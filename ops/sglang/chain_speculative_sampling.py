@@ -101,3 +101,38 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return "B{B}_S{S}_V{V}".format(**binding)
+
+
+def config(binding, dtype):
+    B, S, V = binding["B"], binding["S"], binding["V"]
+    num_slots = B * S
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "predicts": {"shape": [num_slots], "dtype": "torch.int32",
+                         "note": "原地写回（输出缓冲）"},
+            "accept_index": {"shape": [B, S], "dtype": "torch.int64",
+                             "note": "原地写回（输出缓冲）"},
+            "accept_token_num": {"shape": [B], "dtype": "torch.int32",
+                                 "note": "原地写回（输出缓冲）"},
+            "candidates": {"shape": [B, S], "dtype": "torch.int32"},
+            "retrive_index": {"shape": [B, S], "dtype": "torch.int64"},
+            "retrive_next_token": {"shape": [B, S], "dtype": "torch.int32",
+                                   "note": "dummy 树结构"},
+            "retrive_next_sibling": {"shape": [B, S], "dtype": "torch.int32",
+                                     "note": "dummy 树结构"},
+            "uniform_samples": {"shape": [B, S - 1], "dtype": dt},
+            "uniform_samples_for_final_sampling": {"shape": [B], "dtype": dt},
+            "target_probs": {"shape": [B, S, V], "dtype": dt},
+            "draft_probs": {"shape": [B, S - 1, V], "dtype": dt},
+            "threshold_single": {"scalar": 0.0},
+            "threshold_acc": {"scalar": 0.0},
+            "deterministic": {"scalar": False},
+        },
+        "outputs": {
+            "predicts": {"shape": [num_slots], "dtype": "torch.int32"},
+            "accept_index": {"shape": [B, S], "dtype": "torch.int64"},
+            "accept_token_num": {"shape": [B], "dtype": "torch.int32"},
+        },
+        "dims": {"B": B, "S": S, "V": V, "num_slots": num_slots},
+    }
