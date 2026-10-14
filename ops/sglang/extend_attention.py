@@ -146,3 +146,39 @@ def key_shape(binding):
         binding["H_KV"],
         binding["D"],
     )
+
+
+def config(binding, dtype):
+    B, n_ctx = binding["B"], binding["n_ctx"]
+    H_Q, H_KV, D = binding["H_Q"], binding["H_KV"], binding["D"]
+    dt = str(dtype)
+    # 前缀/扩展长度按 seed=0 随机，故 total/extend token 数据相关，用符号描述。
+    tt = "total_token_num"
+    et = "extend_token_num"
+    return {
+        "inputs": {
+            "q_extend": {"shape": [et, H_Q, D], "dtype": dt},
+            "k_extend": {"shape": [et, H_KV, D], "dtype": dt},
+            "v_extend": {"shape": [et, H_KV, D], "dtype": dt},
+            "o_extend": {"shape": [et, H_Q, D], "dtype": dt, "note": "原地写回"},
+            "k_buffer": {"shape": [tt, H_KV, D], "dtype": dt},
+            "v_buffer": {"shape": [tt, H_KV, D], "dtype": dt},
+            "qo_indptr": {"shape": [B + 1], "dtype": "torch.int32"},
+            "kv_indptr": {"shape": [B + 1], "dtype": "torch.int32"},
+            "kv_indices": {"shape": ["sum(prefix_len)"], "dtype": "torch.int32"},
+            "custom_mask": {"scalar": None},
+            "is_causal": {"scalar": True},
+            "mask_indptr": {"scalar": None},
+            "max_len_extend": {"note": "max(b_seq_len_extend)，数据相关"},
+            "sm_scale": {"scalar": 1.0},
+            "logit_cap": {"scalar": 1.0},
+        },
+        "outputs": {
+            "o_extend": {"shape": [et, H_Q, D], "dtype": dt},
+        },
+        "dims": {
+            "B": B, "n_ctx": n_ctx, "H_Q": H_Q, "H_KV": H_KV, "D": D,
+            "note": "prefix/extend 长度 seed=0 随机；"
+                    "total_token_num/extend_token_num 数据相关",
+        },
+    }

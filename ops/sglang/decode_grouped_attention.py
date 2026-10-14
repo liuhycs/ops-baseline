@@ -117,3 +117,35 @@ def key_shape(binding):
         binding["H_KV"],
         binding["D"],
     )
+
+
+def config(binding, dtype):
+    B, seq_len = binding["B"], binding["seq_len"]
+    H_Q, H_KV, D = binding["H_Q"], binding["H_KV"], binding["D"]
+    total_tokens = B * seq_len
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "q": {"shape": [B, H_Q, D], "dtype": dt},
+            "k_buffer": {"shape": [total_tokens, H_KV, D], "dtype": dt},
+            "v_buffer": {"shape": [total_tokens, H_KV, D], "dtype": dt},
+            "o": {"shape": [B, H_Q, D], "dtype": dt, "note": "原地写回"},
+            "kv_indptr": {"shape": [B + 1], "dtype": "torch.int32"},
+            "kv_indices": {"shape": [total_tokens], "dtype": "torch.int32"},
+            "attn_logits": {"shape": [B, H_Q, _MAX_KV_SPLITS, D],
+                            "dtype": "torch.float32", "note": "原地写回（scratch）"},
+            "attn_lse": {"shape": [B, H_Q, _MAX_KV_SPLITS],
+                         "dtype": "torch.float32", "note": "原地写回（scratch）"},
+            "num_kv_splits": {"shape": [B], "dtype": "torch.int32"},
+            "max_kv_splits": {"scalar": _MAX_KV_SPLITS},
+            "sm_scale": {"scalar": 1.0 / (D ** 0.5)},
+            "logit_cap": {"scalar": 1.0},
+        },
+        "outputs": {
+            "o": {"shape": [B, H_Q, D], "dtype": dt},
+        },
+        "dims": {
+            "B": B, "seq_len": seq_len, "total_tokens": total_tokens,
+            "H_Q": H_Q, "H_KV": H_KV, "D": D, "max_kv_splits": _MAX_KV_SPLITS,
+        },
+    }

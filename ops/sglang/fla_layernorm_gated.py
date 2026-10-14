@@ -73,3 +73,27 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["t"], binding["d"]]
+
+
+def config(binding, dtype):
+    t, d = binding["t"], binding["d"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [t, d], "dtype": dt},
+            "g": {"shape": [t, d], "dtype": dt},
+            "weight": {"shape": [d], "dtype": dt},
+            "bias": {"shape": [d], "dtype": dt},
+            "activation": {"scalar": "swish"},
+            "eps": {"scalar": _EPS},
+            "out_dtype": {"scalar": dt},
+            "is_rms_norm": {"scalar": True},
+        },
+        "outputs": {
+            "y": {"shape": [t, d], "dtype": dt},
+            "mean": {"note": "RMSNorm 下为 None"},
+            "rstd": {"shape": [t], "dtype": "torch.float32"},
+            "residual_out": {"note": "无 residual 融合时为 None"},
+        },
+        "dims": {"t": t, "d": d},
+    }

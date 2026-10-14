@@ -65,3 +65,21 @@ def build_inputs(binding, dtype, device):
 def key_shape(binding):
     n = binding["n"]
     return [8 * n, binding["k"]]
+
+
+def config(binding, dtype):
+    k, n = binding["k"], binding["n"]
+    m = 8 * n
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "a": {"shape": [m, k], "dtype": dt},
+            "expert_offsets": {"shape": [9], "dtype": "torch.int32",
+                               "note": "cumsum([0]+[n]*8)，num_groups+1"},
+            "m_alignment": {"scalar": 1},
+        },
+        "outputs": {
+            "out": {"shape": [m, k], "dtype": dt, "note": "逐组转置结果"},
+        },
+        "dims": {"m": m, "k": k, "n_per_group": n, "num_groups": 8},
+    }

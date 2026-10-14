@@ -81,3 +81,28 @@ def key_shape(binding):
     s = sum(binding["seg_lens"])
     return (f"s{s}_L{binding['num_lora']}_r{binding['r']}_k{binding['k']}"
             f"_sl{binding['num_slices']}")
+
+
+def config(binding, dtype):
+    seg_lens = binding["seg_lens"]
+    num_lora, r, k, num_slices = (
+        binding["num_lora"], binding["r"], binding["k"], binding["num_slices"],
+    )
+    s = sum(seg_lens)
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [s, k], "dtype": dt},
+            "weights": {"shape": [num_lora, num_slices * r, k], "dtype": dt},
+            "batch_info": {"note": "LoRABatchInfo（seg_indptr/weight_indices/"
+                           "lora_ranks/scalings 等 LoRA 分段路由 metadata）"},
+            "num_slices": {"scalar": num_slices},
+        },
+        "outputs": {
+            "output": {"shape": [s, num_slices * r], "dtype": dt},
+        },
+        "dims": {
+            "seg_lens": list(seg_lens), "s": s,
+            "num_lora": num_lora, "r": r, "k": k, "num_slices": num_slices,
+        },
+    }

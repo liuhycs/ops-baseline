@@ -69,3 +69,23 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["m"], 2 * binding["half_hidden"]]
+
+
+def config(binding, dtype):
+    m, half_hidden = binding["m"], binding["half_hidden"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "gateup_output": {"shape": [m, 2 * half_hidden], "dtype": dt,
+                              "note": "前半 gate / 后半 up"},
+            "down_input": {"shape": [m, half_hidden], "dtype": dt,
+                           "note": "原地写回（另分配的输出缓冲）"},
+            "config": {"scalar": {}},
+            "activation": {"scalar": _ACTIVATION},
+            "swiglu_limit": {"scalar": _SWIGLU_LIMIT},
+        },
+        "outputs": {
+            "down_input": {"shape": [m, half_hidden], "dtype": dt},
+        },
+        "dims": {"m": m, "half_hidden": half_hidden},
+    }

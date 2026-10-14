@@ -64,3 +64,23 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["batch"], binding["num_heads"]]
+
+
+def config(binding, dtype):
+    batch, num_heads = binding["batch"], binding["num_heads"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "A_log": {"shape": [num_heads], "dtype": "torch.float32"},
+            "a": {"shape": [batch, num_heads], "dtype": "torch.float32"},
+            "b": {"shape": [batch, num_heads], "dtype": "torch.float32"},
+            "dt_bias": {"shape": [num_heads], "dtype": "torch.float32"},
+            "beta": {"scalar": 1.0},
+            "threshold": {"scalar": 20.0},
+        },
+        "outputs": {
+            "g": {"shape": [batch, num_heads], "dtype": "torch.float32"},
+            "beta_output": {"shape": [batch, num_heads], "dtype": "torch.float32"},
+        },
+        "dims": {"batch": batch, "num_heads": num_heads},
+    }

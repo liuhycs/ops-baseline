@@ -119,3 +119,34 @@ def key_shape(binding):
         f"_nh{binding['nheads']}_ng{binding['ngroups']}_hd{binding['headdim']}"
         f"_ds{binding['dstate']}"
     )
+
+
+def config(binding, dtype):
+    batch = binding["batch"]
+    nchunks = binding["nchunks"]
+    chunk_size = binding["chunk_size"]
+    nheads = binding["nheads"]
+    ngroups = binding["ngroups"]
+    headdim = binding["headdim"]
+    dstate = binding["dstate"]
+    seqlen = nchunks * chunk_size
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "B": {"shape": [batch, seqlen, ngroups, dstate], "dtype": dt},
+            "x": {"shape": [batch, seqlen, nheads, headdim], "dtype": dt},
+            "dt": {"shape": [batch, nheads, nchunks, chunk_size],
+                   "dtype": "torch.float32"},
+            "dA_cumsum": {"shape": [batch, nheads, nchunks, chunk_size],
+                          "dtype": "torch.float32"},
+        },
+        "outputs": {
+            "states": {"shape": [batch, nchunks, nheads, headdim, dstate],
+                       "dtype": "torch.float32"},
+        },
+        "dims": {
+            "batch": batch, "nchunks": nchunks, "chunk_size": chunk_size,
+            "seqlen": seqlen, "nheads": nheads, "ngroups": ngroups,
+            "headdim": headdim, "dstate": dstate,
+        },
+    }

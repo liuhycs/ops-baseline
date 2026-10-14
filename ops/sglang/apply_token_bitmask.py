@@ -71,3 +71,19 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["B"], binding["V"]]
+
+
+def config(binding, dtype):
+    B, V = binding["B"], binding["V"]
+    words = (V + 31) // 32
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "logits": {"shape": [B, V], "dtype": dt, "note": "原地写回"},
+            "bitmask": {"shape": [B, words], "dtype": "torch.int32"},
+        },
+        "outputs": {
+            "logits": {"shape": [B, V], "dtype": dt},
+        },
+        "dims": {"B": B, "V": V, "words": words},
+    }

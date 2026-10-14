@@ -77,3 +77,33 @@ def build_inputs(binding, dtype, device):
 def key_shape(binding):
     n = binding["n_routed"] + binding["n_shared"]
     return [binding["m"], n, binding["k"]]
+
+
+def config(binding, dtype):
+    m, n_routed, n_shared, k, route_scale, global_scale = (
+        binding["m"], binding["n_routed"], binding["n_shared"], binding["k"],
+        binding["route_scale"], binding["global_scale"],
+    )
+    n = n_routed + n_shared
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "logits": {"shape": [m, n], "dtype": dt},
+            "k": {"scalar": k},
+            "n_shared_experts": {"scalar": n_shared},
+            "route_scale": {"scalar": route_scale},
+            "global_scale": {"shape": [], "dtype": "torch.float32",
+                             "note": "0-d 标量张量"},
+            "bias": {"shape": [n_routed], "dtype": "torch.float32"},
+            "return_packed_topk": {"scalar": False},
+        },
+        "outputs": {
+            "routed_w": {"shape": [m, k], "dtype": "torch.float32"},
+            "indices": {"shape": [m, k], "dtype": "torch.int32"},
+            "shared_w": {"shape": [m, n_shared], "dtype": "torch.float32"},
+        },
+        "dims": {
+            "m": m, "n": n, "n_routed": n_routed, "n_shared": n_shared, "k": k,
+            "route_scale": route_scale, "global_scale": global_scale,
+        },
+    }

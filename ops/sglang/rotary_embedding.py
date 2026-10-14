@@ -73,3 +73,20 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["tokens"], binding["heads"], binding["head_size"]]
+
+
+def config(binding, dtype):
+    tokens, heads, head_size = binding["tokens"], binding["heads"], binding["head_size"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [tokens, heads, head_size], "dtype": dt},
+            "cos": {"shape": [tokens, head_size // 2], "dtype": dt},
+            "sin": {"shape": [tokens, head_size // 2], "dtype": dt},
+            "interleaved": {"scalar": False},
+        },
+        "outputs": {
+            "out": {"shape": [tokens, heads, head_size], "dtype": dt},
+        },
+        "dims": {"tokens": tokens, "heads": heads, "head_size": head_size},
+    }

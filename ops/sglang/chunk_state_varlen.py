@@ -134,3 +134,36 @@ def key_shape(binding):
         f"_nh{binding['nheads']}_ng{binding['ngroups']}_hd{binding['headdim']}"
         f"_ds{binding['dstate']}"
     )
+
+
+def config(binding, dtype):
+    seq_lens = list(binding["seq_lens"])
+    chunk_size = binding["chunk_size"]
+    nheads = binding["nheads"]
+    ngroups = binding["ngroups"]
+    headdim = binding["headdim"]
+    dstate = binding["dstate"]
+    nseq = len(seq_lens)
+    total_seqlen = sum(seq_lens)
+    nchunks = total_seqlen // chunk_size
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "B": {"shape": [total_seqlen, ngroups, dstate], "dtype": dt},
+            "x": {"shape": [total_seqlen, nheads, headdim], "dtype": dt},
+            "dt": {"shape": [nheads, nchunks, chunk_size], "dtype": "torch.float32"},
+            "dA_cumsum": {"shape": [nheads, nchunks, chunk_size],
+                          "dtype": "torch.float32"},
+            "cu_seqlens": {"shape": [nseq + 1], "dtype": "torch.int32"},
+            "chunk_states": {"shape": [nchunks, nheads, headdim, dstate], "dtype": dt},
+        },
+        "outputs": {
+            "states": {"shape": [nseq, nheads, headdim, dstate],
+                       "dtype": "torch.float32"},
+        },
+        "dims": {
+            "seq_lens": seq_lens, "nseq": nseq, "total_seqlen": total_seqlen,
+            "chunk_size": chunk_size, "nchunks": nchunks, "nheads": nheads,
+            "ngroups": ngroups, "headdim": headdim, "dstate": dstate,
+        },
+    }

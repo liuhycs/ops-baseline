@@ -58,3 +58,18 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["t"], binding["d"]]
+
+
+def config(binding, dtype):
+    t, d = binding["t"], binding["d"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [t, d], "dtype": dt},
+            "eps": {"scalar": _EPS},
+        },
+        "outputs": {
+            "out": {"shape": [t, d], "dtype": dt},
+        },
+        "dims": {"t": t, "d": d},
+    }

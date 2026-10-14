@@ -76,3 +76,25 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["num_tokens"], binding["top_k"], binding["size"]]
+
+
+def config(binding, dtype):
+    num_tokens, top_k, size = (
+        binding["num_tokens"], binding["top_k"], binding["size"],
+    )
+    dt = str(dtype)
+    # 沿 top_k 维加权求和（weighted mul-sum），输出 [num_tokens, size]。
+    return {
+        "inputs": {
+            "inputs": {"shape": [num_tokens, top_k, size], "dtype": dt},
+            "topk_weights": {"shape": [num_tokens, top_k], "dtype": dt},
+            "topk_ids": {"scalar": None},
+            "expert_map": {"scalar": None},
+            "routed_scaling_factor": {"scalar": None},
+            "is_ep": {"scalar": False},
+        },
+        "outputs": {
+            "output": {"shape": [num_tokens, size], "dtype": dt},
+        },
+        "dims": {"num_tokens": num_tokens, "top_k": top_k, "size": size},
+    }

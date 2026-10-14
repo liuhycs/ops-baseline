@@ -74,3 +74,24 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["bs"], binding["vocab_size"]]
+
+
+def config(binding, dtype):
+    bs, V = binding["bs"], binding["vocab_size"]
+    num_draft_cols = binding["num_draft_cols"]
+    draft_token_column = binding["draft_token_column"]
+    return {
+        "inputs": {
+            "next_token_logits": {"shape": [bs, V], "dtype": "torch.float32"},
+            "positions": {"shape": [bs], "dtype": "torch.int64", "note": "原地写回"},
+            "draft_tokens": {"shape": [bs, num_draft_cols], "dtype": "torch.int64",
+                             "note": "原地写回"},
+            "draft_token_column": {"scalar": draft_token_column},
+        },
+        "outputs": {
+            "positions": {"shape": [bs], "dtype": "torch.int64"},
+            "draft_tokens": {"shape": [bs, num_draft_cols], "dtype": "torch.int64"},
+        },
+        "dims": {"bs": bs, "vocab_size": V, "num_draft_cols": num_draft_cols,
+                 "draft_token_column": draft_token_column},
+    }

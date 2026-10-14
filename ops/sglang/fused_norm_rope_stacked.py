@@ -96,3 +96,34 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return "t{t}_L{n_layers}_kvh{num_kv_heads}_hd{head_dim}_rd{rotary_dim}".format(**binding)
+
+
+def config(binding, dtype):
+    t = binding["t"]
+    n_layers = binding["n_layers"]
+    num_kv_heads = binding["num_kv_heads"]
+    head_dim = binding["head_dim"]
+    rotary_dim = binding["rotary_dim"]
+    kv_size = num_kv_heads * head_dim
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "kv": {"shape": [t, n_layers, 2 * kv_size], "dtype": dt},
+            "k_norm_weight": {"shape": [n_layers, head_dim], "dtype": "torch.float32"},
+            "eps": {"shape": [n_layers], "dtype": "torch.float32"},
+            "cos_sin_cache": {"shape": [_MAX_POS, rotary_dim], "dtype": dt},
+            "positions": {"shape": [t], "dtype": "torch.int64"},
+            "num_kv_heads": {"scalar": num_kv_heads},
+            "head_dim": {"scalar": head_dim},
+            "rotary_dim": {"scalar": rotary_dim},
+        },
+        "outputs": {
+            "k_out": {"shape": [t, n_layers, kv_size], "dtype": dt},
+            "v_out": {"shape": [t, n_layers, kv_size], "dtype": dt},
+        },
+        "dims": {
+            "t": t, "n_layers": n_layers, "num_kv_heads": num_kv_heads,
+            "head_dim": head_dim, "rotary_dim": rotary_dim, "kv_size": kv_size,
+            "max_pos": _MAX_POS,
+        },
+    }

@@ -60,3 +60,19 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [3, binding["s"], binding["d"]]
+
+
+def config(binding, dtype):
+    s, d = binding["s"], binding["d"]
+    mrope_section = binding["mrope_section"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [3, s, d], "dtype": dt},
+            "mrope_section": {"scalar": list(mrope_section)},
+        },
+        "outputs": {
+            "out": {"shape": [3, s, d], "dtype": dt},
+        },
+        "dims": {"s": s, "d": d, "mrope_section": list(mrope_section)},
+    }

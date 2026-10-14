@@ -72,3 +72,22 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["t"], binding["hc_mult"], binding["hidden"]]
+
+
+def config(binding, dtype):
+    t, hc_mult, hidden = binding["t"], binding["hc_mult"], binding["hidden"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [t, hc_mult, hidden], "dtype": dt},
+            "hc_fn": {"shape": [hc_mult, hc_mult * hidden], "dtype": "torch.float32"},
+            "hc_scale": {"shape": [1], "dtype": "torch.float32"},
+            "hc_base": {"shape": [hc_mult], "dtype": "torch.float32"},
+            "norm_eps": {"scalar": _NORM_EPS},
+            "hc_eps": {"scalar": _HC_EPS},
+        },
+        "outputs": {
+            "out": {"shape": [t, hc_mult, hidden], "dtype": dt},
+        },
+        "dims": {"t": t, "hc_mult": hc_mult, "hidden": hidden},
+    }

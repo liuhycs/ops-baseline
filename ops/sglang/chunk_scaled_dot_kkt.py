@@ -77,3 +77,25 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["b"], binding["t"], binding["h"], binding["kdim"]]
+
+
+def config(binding, dtype):
+    b, t, h, kdim = binding["b"], binding["t"], binding["h"], binding["kdim"]
+    cs = _CHUNK_SIZE
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "q": {"shape": [b, t, h, kdim], "dtype": dt},
+            "k": {"shape": [b, t, h, kdim], "dtype": dt},
+            "gk": {"shape": [b, t, h, kdim], "dtype": dt},
+            "beta": {"shape": [b, t, h], "dtype": "torch.float32"},
+            "scale": {"scalar": kdim ** -0.5},
+            "gk_scale": {"scalar": 1.0},
+            "chunk_size": {"scalar": cs},
+        },
+        "outputs": {
+            "A": {"shape": [b, t, h, cs], "dtype": "torch.float32",
+                  "note": "逐 chunk 的 [BT, BT] 严格下三角修正矩阵"},
+        },
+        "dims": {"b": b, "t": t, "h": h, "kdim": kdim, "chunk_size": cs},
+    }

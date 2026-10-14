@@ -86,3 +86,23 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["m"], binding["n"], binding["k"]]
+
+
+def config(binding, dtype):
+    m, n, k = binding["m"], binding["n"], binding["k"]
+    block_n, block_k = _BLOCK
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "A": {"shape": [m, k], "dtype": "torch.int8"},
+            "B": {"shape": [n, k], "dtype": "torch.int8"},
+            "As": {"shape": [m, k // block_k], "dtype": "torch.float32"},
+            "Bs": {"shape": [n // block_n, k // block_k], "dtype": "torch.float32"},
+            "block_size": {"scalar": list(_BLOCK)},
+            "output_dtype": {"scalar": dt},
+        },
+        "outputs": {
+            "out": {"shape": [m, n], "dtype": dt},
+        },
+        "dims": {"m": m, "n": n, "k": k, "block_n": block_n, "block_k": block_k},
+    }

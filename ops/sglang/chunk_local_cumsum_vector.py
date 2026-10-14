@@ -73,3 +73,30 @@ def build_inputs(binding, dtype, device):
 def key_shape(binding):
     t = binding["nchunks"] * binding["chunk_size"]
     return [binding["batch"], t, binding["nheads"], binding["s"]]
+
+
+def config(binding, dtype):
+    b, nc, cs, h, s = (
+        binding["batch"],
+        binding["nchunks"],
+        binding["chunk_size"],
+        binding["nheads"],
+        binding["s"],
+    )
+    t = nc * cs
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "g": {"shape": [b, t, h, s], "dtype": dt},
+            "chunk_size": {"scalar": cs},
+            "reverse": {"scalar": False},
+            "scale": {"scalar": None},
+        },
+        "outputs": {
+            "out": {"shape": [b, t, h, s], "dtype": dt},
+        },
+        "dims": {
+            "batch": b, "nchunks": nc, "chunk_size": cs,
+            "nheads": h, "s": s, "t": t,
+        },
+    }

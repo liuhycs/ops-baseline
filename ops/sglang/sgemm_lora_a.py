@@ -80,3 +80,28 @@ def build_inputs(binding, dtype, device):
 def key_shape(binding):
     s = sum(binding["seg_lens"])
     return f"s{s}_L{binding['num_lora']}_r{binding['r']}_k{binding['k']}_stk{binding['stack_num']}"
+
+
+def config(binding, dtype):
+    seg_lens = binding["seg_lens"]
+    num_lora, r, k, stack_num = (
+        binding["num_lora"], binding["r"], binding["k"], binding["stack_num"],
+    )
+    s = sum(seg_lens)
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [s, k], "dtype": dt},
+            "weights": {"shape": [num_lora, stack_num * r, k], "dtype": dt},
+            "batch_info": {"note": "LoRABatchInfo（seg_indptr/weight_indices/"
+                           "lora_ranks/scalings 等 LoRA 分段路由 metadata）"},
+            "stack_num": {"scalar": stack_num},
+        },
+        "outputs": {
+            "output": {"shape": [s, stack_num * r], "dtype": dt},
+        },
+        "dims": {
+            "seg_lens": list(seg_lens), "s": s,
+            "num_lora": num_lora, "r": r, "k": k, "stack_num": stack_num,
+        },
+    }

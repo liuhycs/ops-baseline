@@ -64,3 +64,19 @@ def build_inputs(binding, dtype, device):
 
 def key_shape(binding):
     return [binding["m"], binding["k"]]
+
+
+def config(binding, dtype):
+    m, k = binding["m"], binding["k"]
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [m, k], "dtype": dt},
+            "group_size": {"scalar": _GROUP_SIZE},
+        },
+        "outputs": {
+            "q": {"shape": [m, k], "dtype": "torch.int8"},
+            "scale": {"shape": [m, k // _GROUP_SIZE], "dtype": "torch.float32"},
+        },
+        "dims": {"m": m, "k": k, "group_size": _GROUP_SIZE},
+    }

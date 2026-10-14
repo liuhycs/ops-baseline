@@ -93,3 +93,35 @@ def build_inputs(binding, dtype, device):
 def key_shape(binding):
     s = sum(binding["seg_lens"])
     return f"s{s}_L{binding['num_lora']}_r{binding['r']}_dq{binding['dq']}_dkv{binding['dkv']}"
+
+
+def config(binding, dtype):
+    seg_lens = binding["seg_lens"]
+    num_lora, r, dq, dkv = (
+        binding["num_lora"], binding["r"], binding["dq"], binding["dkv"],
+    )
+    s = sum(seg_lens)
+    output_dim = dq + 2 * dkv
+    max_qkv_out_dim = max(dq, dkv)
+    dt = str(dtype)
+    return {
+        "inputs": {
+            "x": {"shape": [s, 3 * r], "dtype": dt},
+            "qkv_lora_b": {"shape": [num_lora, output_dim, r], "dtype": dt},
+            "batch_info": {"note": "LoRABatchInfo（seg_indptr/weight_indices/"
+                           "lora_ranks/scalings 等 LoRA 分段路由 metadata）"},
+            "output_offset": {"shape": [4], "dtype": "torch.int32",
+                              "note": "[0, dq, dq+dkv, dq+2*dkv] 的 qkv 切片偏移"},
+            "max_qkv_out_dim": {"scalar": max_qkv_out_dim},
+            "base_output": {"shape": [s, output_dim], "dtype": dt,
+                            "note": "原地写回"},
+        },
+        "outputs": {
+            "base_output": {"shape": [s, output_dim], "dtype": dt},
+        },
+        "dims": {
+            "seg_lens": list(seg_lens), "s": s,
+            "num_lora": num_lora, "r": r, "dq": dq, "dkv": dkv,
+            "output_dim": output_dim, "max_qkv_out_dim": max_qkv_out_dim,
+        },
+    }
