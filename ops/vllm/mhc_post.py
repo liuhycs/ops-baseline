@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""mhc_post baseline（方案 B）。
+"""mhc_post baseline（方案 A：直调官方 torch.ops.vllm.mhc_post_tilelang）。
 
-native：CustomOp 入口 MHCPostOp（vllm/model_executor/layers/mhc.py#L197，
-    @CustomOp.register("mhc_post")）。它是 nn.Module/CustomOp 子类，不是纯函数：
-    调用实例走 CustomOp.forward -> _forward_method；在 CUDA 平台 dispatch 到
-    forward_cuda（mhc.py#L210），该方法直接调
-    torch.ops.vllm.mhc_post_tilelang(x, residual, post_layer_mix, comb_res_mix)
-    -> out。因此 native() 实例化 MHCPostOp() 并返回该实例本身（callable），
-    op(x, residual, post_layer_mix, comb_res_mix) 即触发 tilelang CUDA kernel。
-    MHCPostOp.__init__ 继承自 CustomOp，无形状入参，一个实例可复用于全部 shape。
-    tilelang 不可用（HAS_TILELANG_MHC=False）时返回 None 优雅跳过。
+native：官方 tilelang 自定义算子 torch.ops.vllm.mhc_post_tilelang
+    （vllm/model_executor/kernels/mhc/tilelang.py#L410，经 direct_register_custom_op
+    注册为 op_name="mhc_post_tilelang"）。签名：
+    mhc_post_tilelang(x, residual, post_layer_mix, comb_res_mix) -> out。
+    这正是 MHCPostOp.forward_cuda（mhc.py#L206）在 CUDA 平台实际 dispatch 的目标，
+    因此直调它可绕开 CustomOp 封装、精确对齐 vllm 的 CUDA tilelang kernel。
+    native() 先 import kernels.mhc（触发算子注册），再返回
+    torch.ops.vllm.mhc_post_tilelang（callable）。tilelang 不可用
+    （layers.mhc.HAS_TILELANG_MHC=False，或算子未注册）时返回 None 优雅跳过。
 
 输入构造复刻 FlagGems-vllm/benchmark/test_mhc.py 的 MHCPostBenchmark.get_input_iter：
     hc_mult = 4
@@ -54,25 +54,24 @@ _SHAPES = [
 
 
 def native():
-    """实例化 MHCPostOp 并返回实例（callable）；不可用时返回 None。
+    """返回 torch.ops.vllm.mhc_post_tilelang（callable）；不可用时返回 None。
 
-    先 import mhc 模块（会触发自定义算子注册）。若 HAS_TILELANG_MHC 为假，
-    forward_cuda 依赖的 torch.ops.vllm.mhc_post_tilelang 不可用，返回 None。
+    先 import kernels.mhc（direct_register_custom_op 在此把 mhc_post_tilelang 注册到
+    torch.ops.vllm），并校验 layers.mhc.HAS_TILELANG_MHC——为假说明当前平台无
+    tilelang CUDA kernel，优雅跳过。
     """
     try:
-        mod = importlib.import_module("vllm.model_executor.layers.mhc")
+        importlib.import_module("vllm.model_executor.kernels.mhc")
     except ImportError:
         return None
-    if not getattr(mod, "HAS_TILELANG_MHC", False):
-        return None  # tilelang CUDA kernel 不可用，优雅跳过
-    cls = getattr(mod, "MHCPostOp", None)
-    if cls is None:
-        return None
     try:
-        inst = cls()  # __init__ 继承 CustomOp，无形状入参
-    except Exception:  # noqa: BLE001 — 无 vLLM 运行时上下文时优雅跳过
-        return None
-    return inst if callable(inst) else None
+        layers = importlib.import_module("vllm.model_executor.layers.mhc")
+    except ImportError:
+        layers = None
+    if layers is not None and not getattr(layers, "HAS_TILELANG_MHC", False):
+        return None  # tilelang CUDA kernel 不可用，优雅跳过
+    op = getattr(torch.ops.vllm, "mhc_post_tilelang", None)
+    return op if callable(op) else None
 
 
 def grid():
