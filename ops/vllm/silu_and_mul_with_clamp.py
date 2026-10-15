@@ -80,9 +80,9 @@ def build_inputs(binding, dtype, device):
 
 
 def key_shape(binding):
-    shape = list(binding["shape"])
-    d = shape[-1]
-    return shape[:-1] + [2 * d]
+    # key = 第一个输入张量 result 的形状（宽度 d）。benchmark 侧匹配按
+    # _first_tensor_shape 取第一个张量 shape 直查，故此处不再 ×2，保持两端一致。
+    return list(binding["shape"])
 
 
 def config(binding, dtype):

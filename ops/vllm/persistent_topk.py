@@ -51,6 +51,9 @@ IS_INPLACE = True  # indices 原地写
 
 _K = 512
 _STRIDE = 262144
+# benchmark 侧 workspace = (1 if HAS_VLLM else 2)*1MB。签名匹配按 HAS_VLLM=False
+# 的 2MB 口径声明（见 config 注释）；build_inputs 的实采仍用 1MB，互不影响。
+_WORKSPACE_SIG = 2 * 1024 * 1024  # 2097152
 
 # benchmark set_shapes 的同构主 shapes：(num_rows, seq_len, max_seq_len)。
 _SHAPES = [
@@ -124,6 +127,13 @@ def build_inputs(binding, dtype, device):
     return (logits, lengths, indices, workspace, _K, m), {}
 
 
+# 已知限制：benchmark 的张量签名匹配只看 shape + 标量，看不到张量内容。
+# homo 档 [496, 262144, 1048576] 与 hetero 档 nr496_maxlen1048576 在 num_rows=496、
+# max_seq_len=1048576 下，所有张量 shape 与标量完全相同（唯一区别是 lengths 的
+# 内容：homo 全等 seq_len vs hetero linspace 逐行不等），故这两个档彼此无法区分，
+# 均会匹配未命中（benchmark 的 >8192 过滤不改变这一点，两档都保留）。其余所有档
+# 可由 max_seq_len 标量唯一区分。此歧义源于 benchmark 的 shape 设计，baseline 侧
+# 的 config 无法消除——接受这两个档 miss。
 def key_shape(binding):
     if binding["kind"] == "hetero":
         return f"hetero_nr{binding['num_rows']}_maxlen{binding['max_len']}"
@@ -135,6 +145,11 @@ def config(binding, dtype):
     if binding["kind"] == "hetero":
         ml = binding["max_len"]
         return {
+            # 签名匹配口径对齐 benchmark get_input_iter 的 record（yield 的 6 元组）：
+            #   logits, lengths, indices, workspace, max_seq_len(标量), seq_lens
+            # 故此处：补 seq_lens 张量、workspace 用 2MB（HAS_VLLM=False）、去掉 k
+            # 标量（benchmark record 未含 k，k 写死在 gems/baseline 调用里）。
+            # build_inputs 的实采参数不受影响。
             "inputs": {
                 "logits": {"shape": [r, _STRIDE], "dtype": "torch.float32",
                            "note": "各行 seq_len=linspace(1,min(max_len,STRIDE),nr)，"
@@ -143,9 +158,10 @@ def config(binding, dtype):
                             "note": "异构：逐行不等"},
                 "output": {"shape": [r, _K], "dtype": "torch.int32",
                            "note": "原地写回（top-k 索引）"},
-                "workspace": {"shape": [1024 * 1024], "dtype": "torch.uint8"},
-                "k": {"scalar": _K},
+                "workspace": {"shape": [_WORKSPACE_SIG], "dtype": "torch.uint8"},
                 "max_seq_len": {"scalar": ml},
+                "seq_lens": {"shape": [r], "dtype": "torch.int32",
+                             "note": "benchmark 第 6 参，逐行 seq_len"},
             },
             "outputs": {
                 "output": {"shape": [r, _K], "dtype": "torch.int32"},
@@ -156,15 +172,18 @@ def config(binding, dtype):
 
     s, m = binding["seq_len"], binding["max_seq_len"]
     return {
+        # 签名匹配口径对齐 benchmark record（见 hetero 分支注释）：补 seq_lens、
+        # workspace 用 2MB、去掉 k 标量。
         "inputs": {
             "logits": {"shape": [r, _STRIDE], "dtype": "torch.float32",
                        "note": f"前 seq_len={s} 有效，其余 -inf"},
             "lengths": {"shape": [r], "dtype": "torch.int32"},
             "output": {"shape": [r, _K], "dtype": "torch.int32",
                        "note": "原地写回（top-k 索引）"},
-            "workspace": {"shape": [1024 * 1024], "dtype": "torch.uint8"},
-            "k": {"scalar": _K},
+            "workspace": {"shape": [_WORKSPACE_SIG], "dtype": "torch.uint8"},
             "max_seq_len": {"scalar": m},
+            "seq_lens": {"shape": [r], "dtype": "torch.int32",
+                         "note": "benchmark 第 6 参，逐行 seq_len"},
         },
         "outputs": {
             "output": {"shape": [r, _K], "dtype": "torch.int32"},
