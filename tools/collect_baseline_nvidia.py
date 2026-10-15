@@ -697,7 +697,7 @@ def _flush_results(results, output_path):
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     tmp = output_path.with_suffix(output_path.suffix + ".tmp")
-    tmp.write_text(json.dumps(results, indent=2))
+    tmp.write_text(json.dumps(results, indent=2, ensure_ascii=False))
     os.replace(tmp, output_path)
 
 

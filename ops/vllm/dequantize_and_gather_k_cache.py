@@ -172,8 +172,13 @@ def config(binding, dtype):
         "inputs": {
             "out": {"shape": [b, g, d], "dtype": "torch.bfloat16",
                     "note": "原地写回"},
-            "k_cache": {"shape": [num_blocks, _BLOCK_SIZE,
-                                  block_stride // _BLOCK_SIZE],
+            # 签名匹配口径：benchmark 侧 get_input_iter 构造的 k_cache 是 2D
+            # [num_blocks, block_stride]（走 torch 参考/扁平用法），而 native 实际
+            # 要求 3D [num_blocks, block_size, per_token]（见 build_inputs）。两者
+            # 元素数相同、仅 reshape 不同。此处 config 用于 benchmark 的张量签名
+            # 回退匹配，故按 benchmark 的 2D 声明，使签名集合与之对齐；采集实调仍用
+            # build_inputs 的 3D，不受影响。
+            "k_cache": {"shape": [num_blocks, block_stride],
                         "dtype": "torch.uint8"},
             "seq_lens": {"shape": [b], "dtype": "torch.int32"},
             "gather_lens": {"shape": [b], "dtype": "torch.int32"},

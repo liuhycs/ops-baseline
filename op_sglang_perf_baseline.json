@@ -123,13 +123,13 @@
     }
   },
   "_scaling_factors": {
-    "_note": "factor = vendor_peak / H800_peak\uff1bnull \u8868\u793a\u5206\u5b50\u6216\u5206\u6bcd\u7f3a\u5931\uff1bnominal/measured \u5404\u4e00\u5957\u3002\u4f9b flaggems-vllm \u8de8\u82af\u7247\u5f52\u4e00\u5316\u5bf9\u6bd4\u4f7f\u7528\u3002",
+    "_note": "factor = vendor_peak / H800_peak；null 表示分子或分母缺失；nominal/measured 各一套。供 flaggems-vllm 跨芯片归一化对比使用。",
     "reference_chip": "H800",
     "source_specs": "hardware_specs.json",
     "chips": [
       {
         "vendor": "nvidia",
-        "vendor_zh": "\u82f1\u4f1f\u8fbe",
+        "vendor_zh": "英伟达",
         "chip": "H800",
         "nominal": {
           "bandwidth_gbps": 1.0,
@@ -174,7 +174,7 @@
       },
       {
         "vendor": "nvidia",
-        "vendor_zh": "\u82f1\u4f1f\u8fbe",
+        "vendor_zh": "英伟达",
         "chip": "H100",
         "nominal": {
           "bandwidth_gbps": 1.0,
@@ -219,7 +219,7 @@
       },
       {
         "vendor": "t-head",
-        "vendor_zh": "\u5e73\u5934\u54e5",
+        "vendor_zh": "平头哥",
         "chip": "PPU-ZW810E",
         "nominal": {
           "bandwidth_gbps": null,
@@ -264,7 +264,7 @@
       },
       {
         "vendor": "t-head",
-        "vendor_zh": "\u5e73\u5934\u54e5",
+        "vendor_zh": "平头哥",
         "chip": "m890",
         "nominal": {
           "bandwidth_gbps": null,
@@ -309,7 +309,7 @@
       },
       {
         "vendor": "enflame",
-        "vendor_zh": "\u71e7\u539f",
+        "vendor_zh": "燧原",
         "chip": "S60",
         "nominal": {
           "bandwidth_gbps": 0.200597,
@@ -354,7 +354,7 @@
       },
       {
         "vendor": "ascend",
-        "vendor_zh": "\u534e\u4e3a",
+        "vendor_zh": "华为",
         "chip": "Atlas 800T A3",
         "nominal": {
           "bandwidth_gbps": null,
@@ -399,7 +399,7 @@
       },
       {
         "vendor": "metax",
-        "vendor_zh": "\u6c90\u66e6",
+        "vendor_zh": "沐曦",
         "chip": "C550",
         "nominal": {
           "bandwidth_gbps": 0.537313,
@@ -444,7 +444,7 @@
       },
       {
         "vendor": "kunlunxin",
-        "vendor_zh": "\u6606\u4ed1\u82af",
+        "vendor_zh": "昆仑芯",
         "chip": "P900",
         "nominal": {
           "bandwidth_gbps": 0.776119,
@@ -489,7 +489,7 @@
       },
       {
         "vendor": "kunlunxin",
-        "vendor_zh": "\u6606\u4ed1\u82af",
+        "vendor_zh": "昆仑芯",
         "chip": "P800",
         "nominal": {
           "bandwidth_gbps": null,
@@ -534,7 +534,7 @@
       },
       {
         "vendor": "mthreads",
-        "vendor_zh": "\u6469\u5c14",
+        "vendor_zh": "摩尔",
         "chip": "MTT-S5000",
         "nominal": {
           "bandwidth_gbps": 0.477612,
@@ -579,7 +579,7 @@
       },
       {
         "vendor": "hygon",
-        "vendor_zh": "\u6d77\u5149",
+        "vendor_zh": "海光",
         "chip": "BW1000",
         "nominal": {
           "bandwidth_gbps": 0.537313,
@@ -624,7 +624,7 @@
       },
       {
         "vendor": "iluvatar",
-        "vendor_zh": "\u5929\u6570",
+        "vendor_zh": "天数",
         "chip": "BI-V150",
         "nominal": {
           "bandwidth_gbps": 0.477612,
@@ -669,7 +669,7 @@
       },
       {
         "vendor": "tsingmicro",
-        "vendor_zh": "\u6e05\u5fae\u667a\u80fd",
+        "vendor_zh": "清微智能",
         "chip": "TX8110",
         "nominal": {
           "bandwidth_gbps": null,
@@ -714,7 +714,7 @@
       },
       {
         "vendor": "tsingmicro",
-        "vendor_zh": "\u6e05\u5fae\u667a\u80fd",
+        "vendor_zh": "清微智能",
         "chip": "REX1032",
         "nominal": {
           "bandwidth_gbps": 0.238806,
@@ -759,7 +759,7 @@
       },
       {
         "vendor": "cambricon",
-        "vendor_zh": "\u5bd2\u6b66\u7eaa",
+        "vendor_zh": "寒武纪",
         "chip": "MLU590-M9DE",
         "nominal": {
           "bandwidth_gbps": 0.671642,
@@ -817,7 +817,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               },
               "down_input": {
                 "shape": [
@@ -825,7 +825,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u53e6\u5206\u914d\u7684\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（另分配的输出缓冲）"
               },
               "config": {
                 "scalar": {}
@@ -897,7 +897,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               },
               "down_input": {
                 "shape": [
@@ -905,7 +905,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u53e6\u5206\u914d\u7684\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（另分配的输出缓冲）"
               },
               "config": {
                 "scalar": {}
@@ -977,7 +977,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               },
               "down_input": {
                 "shape": [
@@ -985,7 +985,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u53e6\u5206\u914d\u7684\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（另分配的输出缓冲）"
               },
               "config": {
                 "scalar": {}
@@ -1057,7 +1057,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               },
               "down_input": {
                 "shape": [
@@ -1065,7 +1065,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u53e6\u5206\u914d\u7684\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（另分配的输出缓冲）"
               },
               "config": {
                 "scalar": {}
@@ -1137,7 +1137,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               },
               "down_input": {
                 "shape": [
@@ -1145,7 +1145,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u53e6\u5206\u914d\u7684\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（另分配的输出缓冲）"
               },
               "config": {
                 "scalar": {}
@@ -1222,7 +1222,7 @@
                   152064
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "bitmask": {
                 "shape": [
@@ -1293,7 +1293,7 @@
                   152064
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "bitmask": {
                 "shape": [
@@ -1364,7 +1364,7 @@
                   152064
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "bitmask": {
                 "shape": [
@@ -1435,7 +1435,7 @@
                   152064
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "bitmask": {
                 "shape": [
@@ -1506,7 +1506,7 @@
                   152064
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "bitmask": {
                 "shape": [
@@ -1782,7 +1782,7 @@
                   3
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u66f4\u65b0\uff08kernel \u628a\u5c3e\u7a97\u5199\u56de\uff09"
+                "note": "原地更新（kernel 把尾窗写回）"
               },
               "query_start_loc": {
                 "shape": [
@@ -1791,7 +1791,7 @@
                 "dtype": "torch.int32"
               },
               "seq_lens_cpu": {
-                "note": "seq_lens python list\uff0c\u957f\u5ea6 batch"
+                "note": "seq_lens python list，长度 batch"
               },
               "cache_indices": {
                 "shape": [
@@ -1902,7 +1902,7 @@
                   3
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u66f4\u65b0\uff08kernel \u628a\u5c3e\u7a97\u5199\u56de\uff09"
+                "note": "原地更新（kernel 把尾窗写回）"
               },
               "query_start_loc": {
                 "shape": [
@@ -1911,7 +1911,7 @@
                 "dtype": "torch.int32"
               },
               "seq_lens_cpu": {
-                "note": "seq_lens python list\uff0c\u957f\u5ea6 batch"
+                "note": "seq_lens python list，长度 batch"
               },
               "cache_indices": {
                 "shape": [
@@ -2038,7 +2038,7 @@
                   3
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u66f4\u65b0"
+                "note": "原地更新"
               },
               "weight": {
                 "shape": [
@@ -2128,7 +2128,7 @@
                   3
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u66f4\u65b0"
+                "note": "原地更新"
               },
               "weight": {
                 "shape": [
@@ -2214,7 +2214,7 @@
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "accept_index": {
                 "shape": [
@@ -2222,14 +2222,14 @@
                   4
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "accept_token_num": {
                 "shape": [
                   1
                 ],
                 "dtype": "torch.int32",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "candidates": {
                 "shape": [
@@ -2251,7 +2251,7 @@
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "dummy \u6811\u7ed3\u6784"
+                "note": "dummy 树结构"
               },
               "retrive_next_sibling": {
                 "shape": [
@@ -2259,7 +2259,7 @@
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "dummy \u6811\u7ed3\u6784"
+                "note": "dummy 树结构"
               },
               "uniform_samples": {
                 "shape": [
@@ -2373,7 +2373,7 @@
                   32
                 ],
                 "dtype": "torch.int32",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "accept_index": {
                 "shape": [
@@ -2381,14 +2381,14 @@
                   4
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "accept_token_num": {
                 "shape": [
                   8
                 ],
                 "dtype": "torch.int32",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "candidates": {
                 "shape": [
@@ -2410,7 +2410,7 @@
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "dummy \u6811\u7ed3\u6784"
+                "note": "dummy 树结构"
               },
               "retrive_next_sibling": {
                 "shape": [
@@ -2418,7 +2418,7 @@
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "dummy \u6811\u7ed3\u6784"
+                "note": "dummy 树结构"
               },
               "uniform_samples": {
                 "shape": [
@@ -2532,7 +2532,7 @@
                   256
                 ],
                 "dtype": "torch.int32",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "accept_index": {
                 "shape": [
@@ -2540,14 +2540,14 @@
                   4
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "accept_token_num": {
                 "shape": [
                   64
                 ],
                 "dtype": "torch.int32",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "candidates": {
                 "shape": [
@@ -2569,7 +2569,7 @@
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "dummy \u6811\u7ed3\u6784"
+                "note": "dummy 树结构"
               },
               "retrive_next_sibling": {
                 "shape": [
@@ -2577,7 +2577,7 @@
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "dummy \u6811\u7ed3\u6784"
+                "note": "dummy 树结构"
               },
               "uniform_samples": {
                 "shape": [
@@ -2691,7 +2691,7 @@
                   2048
                 ],
                 "dtype": "torch.int32",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "accept_index": {
                 "shape": [
@@ -2699,14 +2699,14 @@
                   4
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "accept_token_num": {
                 "shape": [
                   512
                 ],
                 "dtype": "torch.int32",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "candidates": {
                 "shape": [
@@ -2728,7 +2728,7 @@
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "dummy \u6811\u7ed3\u6784"
+                "note": "dummy 树结构"
               },
               "retrive_next_sibling": {
                 "shape": [
@@ -2736,7 +2736,7 @@
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "dummy \u6811\u7ed3\u6784"
+                "note": "dummy 树结构"
               },
               "uniform_samples": {
                 "shape": [
@@ -2850,7 +2850,7 @@
                   16384
                 ],
                 "dtype": "torch.int32",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "accept_index": {
                 "shape": [
@@ -2858,14 +2858,14 @@
                   4
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "accept_token_num": {
                 "shape": [
                   4096
                 ],
                 "dtype": "torch.int32",
-                "note": "\u539f\u5730\u5199\u56de\uff08\u8f93\u51fa\u7f13\u51b2\uff09"
+                "note": "原地写回（输出缓冲）"
               },
               "candidates": {
                 "shape": [
@@ -2887,7 +2887,7 @@
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "dummy \u6811\u7ed3\u6784"
+                "note": "dummy 树结构"
               },
               "retrive_next_sibling": {
                 "shape": [
@@ -2895,7 +2895,7 @@
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "dummy \u6811\u7ed3\u6784"
+                "note": "dummy 树结构"
               },
               "uniform_samples": {
                 "shape": [
@@ -3582,7 +3582,7 @@
                   64
                 ],
                 "dtype": "torch.float32",
-                "note": "\u9010 chunk \u7684 [BT, BT] \u4e25\u683c\u4e0b\u4e09\u89d2\u4fee\u6b63\u77e9\u9635"
+                "note": "逐 chunk 的 [BT, BT] 严格下三角修正矩阵"
               }
             },
             "dims": {
@@ -3717,7 +3717,7 @@
                   64
                 ],
                 "dtype": "torch.float32",
-                "note": "\u9010 chunk \u7684 [BT, BT] \u4e25\u683c\u4e0b\u4e09\u89d2\u4fee\u6b63\u77e9\u9635"
+                "note": "逐 chunk 的 [BT, BT] 严格下三角修正矩阵"
               }
             },
             "dims": {
@@ -3852,7 +3852,7 @@
                   64
                 ],
                 "dtype": "torch.float32",
-                "note": "\u9010 chunk \u7684 [BT, BT] \u4e25\u683c\u4e0b\u4e09\u89d2\u4fee\u6b63\u77e9\u9635"
+                "note": "逐 chunk 的 [BT, BT] 严格下三角修正矩阵"
               }
             },
             "dims": {
@@ -3987,7 +3987,7 @@
                   64
                 ],
                 "dtype": "torch.float32",
-                "note": "\u9010 chunk \u7684 [BT, BT] \u4e25\u683c\u4e0b\u4e09\u89d2\u4fee\u6b63\u77e9\u9635"
+                "note": "逐 chunk 的 [BT, BT] 严格下三角修正矩阵"
               }
             },
             "dims": {
@@ -4563,14 +4563,14 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "slice_offsets": {
                 "shape": [
                   3
                 ],
                 "dtype": "torch.int32",
-                "note": "slice_sizes \u7684\u524d\u7f00\u548c\u504f\u79fb"
+                "note": "slice_sizes 的前缀和偏移"
               },
               "max_slice_size": {
                 "scalar": 4096
@@ -4581,7 +4581,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               }
             },
             "outputs": {
@@ -4672,14 +4672,14 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "slice_offsets": {
                 "shape": [
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "slice_sizes \u7684\u524d\u7f00\u548c\u504f\u79fb"
+                "note": "slice_sizes 的前缀和偏移"
               },
               "max_slice_size": {
                 "scalar": 4096
@@ -4690,7 +4690,7 @@
                   6144
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               }
             },
             "outputs": {
@@ -4783,7 +4783,7 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "num_slices": {
                 "scalar": 1
@@ -4892,7 +4892,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "b_start_loc": {
                 "shape": [
@@ -5002,7 +5002,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "b_start_loc": {
                 "shape": [
@@ -5112,7 +5112,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "b_start_loc": {
                 "shape": [
@@ -5222,7 +5222,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "b_start_loc": {
                 "shape": [
@@ -5332,7 +5332,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "b_start_loc": {
                 "shape": [
@@ -5442,7 +5442,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "b_start_loc": {
                 "shape": [
@@ -5557,7 +5557,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "kv_indptr": {
                 "shape": [
@@ -5579,7 +5579,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "attn_lse": {
                 "shape": [
@@ -5588,7 +5588,7 @@
                   8
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "num_kv_splits": {
                 "shape": [
@@ -5707,7 +5707,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "kv_indptr": {
                 "shape": [
@@ -5729,7 +5729,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "attn_lse": {
                 "shape": [
@@ -5738,7 +5738,7 @@
                   8
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "num_kv_splits": {
                 "shape": [
@@ -5857,7 +5857,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "kv_indptr": {
                 "shape": [
@@ -5879,7 +5879,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "attn_lse": {
                 "shape": [
@@ -5888,7 +5888,7 @@
                   8
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "num_kv_splits": {
                 "shape": [
@@ -6007,7 +6007,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "kv_indptr": {
                 "shape": [
@@ -6029,7 +6029,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "attn_lse": {
                 "shape": [
@@ -6038,7 +6038,7 @@
                   8
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "num_kv_splits": {
                 "shape": [
@@ -6157,7 +6157,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "kv_indptr": {
                 "shape": [
@@ -6179,7 +6179,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "attn_lse": {
                 "shape": [
@@ -6188,7 +6188,7 @@
                   8
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "num_kv_splits": {
                 "shape": [
@@ -6312,7 +6312,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "kv_indptr": {
                 "shape": [
@@ -6334,7 +6334,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "attn_lse": {
                 "shape": [
@@ -6343,7 +6343,7 @@
                   8
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "num_kv_splits": {
                 "shape": [
@@ -6462,7 +6462,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "kv_indptr": {
                 "shape": [
@@ -6484,7 +6484,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "attn_lse": {
                 "shape": [
@@ -6493,7 +6493,7 @@
                   8
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "num_kv_splits": {
                 "shape": [
@@ -6612,7 +6612,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "kv_indptr": {
                 "shape": [
@@ -6634,7 +6634,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "attn_lse": {
                 "shape": [
@@ -6643,7 +6643,7 @@
                   8
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "num_kv_splits": {
                 "shape": [
@@ -6762,7 +6762,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "kv_indptr": {
                 "shape": [
@@ -6784,7 +6784,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "attn_lse": {
                 "shape": [
@@ -6793,7 +6793,7 @@
                   8
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "num_kv_splits": {
                 "shape": [
@@ -6912,7 +6912,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "kv_indptr": {
                 "shape": [
@@ -6934,7 +6934,7 @@
                   128
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "attn_lse": {
                 "shape": [
@@ -6943,7 +6943,7 @@
                   8
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de\uff08scratch\uff09"
+                "note": "原地写回（scratch）"
               },
               "num_kv_splits": {
                 "shape": [
@@ -7048,7 +7048,7 @@
                   1
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "draft_tokens": {
                 "shape": [
@@ -7056,7 +7056,7 @@
                   4
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "draft_token_column": {
                 "scalar": 0
@@ -7146,7 +7146,7 @@
                   8
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "draft_tokens": {
                 "shape": [
@@ -7154,7 +7154,7 @@
                   4
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "draft_token_column": {
                 "scalar": 0
@@ -7244,7 +7244,7 @@
                   64
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "draft_tokens": {
                 "shape": [
@@ -7252,7 +7252,7 @@
                   4
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "draft_token_column": {
                 "scalar": 0
@@ -7342,7 +7342,7 @@
                   512
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "draft_tokens": {
                 "shape": [
@@ -7350,7 +7350,7 @@
                   4
                 ],
                 "dtype": "torch.int64",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "draft_token_column": {
                 "scalar": 0
@@ -7448,7 +7448,7 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "vocab_size": {
                 "scalar": 32000
@@ -7548,7 +7548,7 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "vocab_size": {
                 "scalar": 128256
@@ -7640,7 +7640,7 @@
                   1024
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k": {
                 "shape": [
@@ -7648,7 +7648,7 @@
                   256
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "cos_sin_cache": {
                 "shape": [
@@ -7752,7 +7752,7 @@
                   1024
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k": {
                 "shape": [
@@ -7760,7 +7760,7 @@
                   256
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "cos_sin_cache": {
                 "shape": [
@@ -7864,7 +7864,7 @@
                   1024
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k": {
                 "shape": [
@@ -7872,7 +7872,7 @@
                   256
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "cos_sin_cache": {
                 "shape": [
@@ -7976,7 +7976,7 @@
                   1024
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k": {
                 "shape": [
@@ -7984,7 +7984,7 @@
                   256
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "cos_sin_cache": {
                 "shape": [
@@ -8118,7 +8118,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k_buffer": {
                 "shape": [
@@ -8164,7 +8164,7 @@
                 "scalar": null
               },
               "max_len_extend": {
-                "note": "max(b_seq_len_extend)\uff0c\u6570\u636e\u76f8\u5173"
+                "note": "max(b_seq_len_extend)，数据相关"
               },
               "sm_scale": {
                 "scalar": 1.0
@@ -8189,7 +8189,7 @@
               "H_Q": 32,
               "H_KV": 8,
               "D": 128,
-              "note": "prefix/extend \u957f\u5ea6 seed=0 \u968f\u673a\uff1btotal_token_num/extend_token_num \u6570\u636e\u76f8\u5173"
+              "note": "prefix/extend 长度 seed=0 随机；total_token_num/extend_token_num 数据相关"
             }
           },
           "T_us": 46.31197868784269,
@@ -8263,7 +8263,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k_buffer": {
                 "shape": [
@@ -8309,7 +8309,7 @@
                 "scalar": null
               },
               "max_len_extend": {
-                "note": "max(b_seq_len_extend)\uff0c\u6570\u636e\u76f8\u5173"
+                "note": "max(b_seq_len_extend)，数据相关"
               },
               "sm_scale": {
                 "scalar": 1.0
@@ -8334,7 +8334,7 @@
               "H_Q": 32,
               "H_KV": 8,
               "D": 128,
-              "note": "prefix/extend \u957f\u5ea6 seed=0 \u968f\u673a\uff1btotal_token_num/extend_token_num \u6570\u636e\u76f8\u5173"
+              "note": "prefix/extend 长度 seed=0 随机；total_token_num/extend_token_num 数据相关"
             }
           },
           "T_us": 506.8844612800714,
@@ -8408,7 +8408,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k_buffer": {
                 "shape": [
@@ -8454,7 +8454,7 @@
                 "scalar": null
               },
               "max_len_extend": {
-                "note": "max(b_seq_len_extend)\uff0c\u6570\u636e\u76f8\u5173"
+                "note": "max(b_seq_len_extend)，数据相关"
               },
               "sm_scale": {
                 "scalar": 1.0
@@ -8479,7 +8479,7 @@
               "H_Q": 32,
               "H_KV": 8,
               "D": 128,
-              "note": "prefix/extend \u957f\u5ea6 seed=0 \u968f\u673a\uff1btotal_token_num/extend_token_num \u6570\u636e\u76f8\u5173"
+              "note": "prefix/extend 长度 seed=0 随机；total_token_num/extend_token_num 数据相关"
             }
           },
           "T_us": 389.0377371776394,
@@ -8553,7 +8553,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k_buffer": {
                 "shape": [
@@ -8599,7 +8599,7 @@
                 "scalar": null
               },
               "max_len_extend": {
-                "note": "max(b_seq_len_extend)\uff0c\u6570\u636e\u76f8\u5173"
+                "note": "max(b_seq_len_extend)，数据相关"
               },
               "sm_scale": {
                 "scalar": 1.0
@@ -8624,7 +8624,7 @@
               "H_Q": 32,
               "H_KV": 8,
               "D": 128,
-              "note": "prefix/extend \u957f\u5ea6 seed=0 \u968f\u673a\uff1btotal_token_num/extend_token_num \u6570\u636e\u76f8\u5173"
+              "note": "prefix/extend 长度 seed=0 随机；total_token_num/extend_token_num 数据相关"
             }
           },
           "T_us": 675.136740391071,
@@ -8720,7 +8720,7 @@
                 "dtype": "torch.bfloat16"
               },
               "mean": {
-                "note": "RMSNorm \u4e0b\u4e3a None"
+                "note": "RMSNorm 下为 None"
               },
               "rstd": {
                 "shape": [
@@ -8729,7 +8729,7 @@
                 "dtype": "torch.float32"
               },
               "residual_out": {
-                "note": "\u65e0 residual \u878d\u5408\u65f6\u4e3a None"
+                "note": "无 residual 融合时为 None"
               }
             },
             "dims": {
@@ -8825,7 +8825,7 @@
                 "dtype": "torch.bfloat16"
               },
               "mean": {
-                "note": "RMSNorm \u4e0b\u4e3a None"
+                "note": "RMSNorm 下为 None"
               },
               "rstd": {
                 "shape": [
@@ -8834,7 +8834,7 @@
                 "dtype": "torch.float32"
               },
               "residual_out": {
-                "note": "\u65e0 residual \u878d\u5408\u65f6\u4e3a None"
+                "note": "无 residual 融合时为 None"
               }
             },
             "dims": {
@@ -8930,7 +8930,7 @@
                 "dtype": "torch.bfloat16"
               },
               "mean": {
-                "note": "RMSNorm \u4e0b\u4e3a None"
+                "note": "RMSNorm 下为 None"
               },
               "rstd": {
                 "shape": [
@@ -8939,7 +8939,7 @@
                 "dtype": "torch.float32"
               },
               "residual_out": {
-                "note": "\u65e0 residual \u878d\u5408\u65f6\u4e3a None"
+                "note": "无 residual 融合时为 None"
               }
             },
             "dims": {
@@ -9035,7 +9035,7 @@
                 "dtype": "torch.bfloat16"
               },
               "mean": {
-                "note": "RMSNorm \u4e0b\u4e3a None"
+                "note": "RMSNorm 下为 None"
               },
               "rstd": {
                 "shape": [
@@ -9044,7 +9044,7 @@
                 "dtype": "torch.float32"
               },
               "residual_out": {
-                "note": "\u65e0 residual \u878d\u5408\u65f6\u4e3a None"
+                "note": "无 residual 融合时为 None"
               }
             },
             "dims": {
@@ -9140,7 +9140,7 @@
                 "dtype": "torch.bfloat16"
               },
               "mean": {
-                "note": "RMSNorm \u4e0b\u4e3a None"
+                "note": "RMSNorm 下为 None"
               },
               "rstd": {
                 "shape": [
@@ -9149,7 +9149,7 @@
                 "dtype": "torch.float32"
               },
               "residual_out": {
-                "note": "\u65e0 residual \u878d\u5408\u65f6\u4e3a None"
+                "note": "无 residual 融合时为 None"
               }
             },
             "dims": {
@@ -11113,7 +11113,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "topk_weights": {
                 "shape": [
@@ -11208,7 +11208,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "topk_weights": {
                 "shape": [
@@ -11303,7 +11303,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "topk_weights": {
                 "shape": [
@@ -11398,7 +11398,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "topk_weights": {
                 "shape": [
@@ -11493,7 +11493,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "topk_weights": {
                 "shape": [
@@ -14136,7 +14136,7 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "output_dim": {
                 "scalar": 4096
@@ -14147,7 +14147,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               }
             },
             "outputs": {
@@ -14232,7 +14232,7 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "output_dim": {
                 "scalar": 4096
@@ -14243,7 +14243,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               }
             },
             "outputs": {
@@ -14319,7 +14319,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -14382,7 +14382,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -14445,7 +14445,7 @@
                   16384
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -14508,7 +14508,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -14571,7 +14571,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -14634,7 +14634,7 @@
                   16384
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -14697,7 +14697,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -14760,7 +14760,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -14823,7 +14823,7 @@
                   16384
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -14886,7 +14886,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -14949,7 +14949,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -15012,7 +15012,7 @@
                   16384
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -15075,7 +15075,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -15138,7 +15138,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -15201,7 +15201,7 @@
                   16384
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a gate / \u540e\u534a up"
+                "note": "前半 gate / 后半 up"
               }
             },
             "outputs": {
@@ -17067,14 +17067,14 @@
                   32
                 ],
                 "dtype": "torch.float32",
-                "note": "\u672c\u9898\u53ea\u8bb0 out"
+                "note": "本题只记 out"
               },
               "rstd": {
                 "shape": [
                   32
                 ],
                 "dtype": "torch.float32",
-                "note": "\u672c\u9898\u53ea\u8bb0 out"
+                "note": "本题只记 out"
               }
             },
             "dims": {
@@ -17176,14 +17176,14 @@
                   256
                 ],
                 "dtype": "torch.float32",
-                "note": "\u672c\u9898\u53ea\u8bb0 out"
+                "note": "本题只记 out"
               },
               "rstd": {
                 "shape": [
                   256
                 ],
                 "dtype": "torch.float32",
-                "note": "\u672c\u9898\u53ea\u8bb0 out"
+                "note": "本题只记 out"
               }
             },
             "dims": {
@@ -17285,14 +17285,14 @@
                   2048
                 ],
                 "dtype": "torch.float32",
-                "note": "\u672c\u9898\u53ea\u8bb0 out"
+                "note": "本题只记 out"
               },
               "rstd": {
                 "shape": [
                   2048
                 ],
                 "dtype": "torch.float32",
-                "note": "\u672c\u9898\u53ea\u8bb0 out"
+                "note": "本题只记 out"
               }
             },
             "dims": {
@@ -17394,14 +17394,14 @@
                   16384
                 ],
                 "dtype": "torch.float32",
-                "note": "\u672c\u9898\u53ea\u8bb0 out"
+                "note": "本题只记 out"
               },
               "rstd": {
                 "shape": [
                   16384
                 ],
                 "dtype": "torch.float32",
-                "note": "\u672c\u9898\u53ea\u8bb0 out"
+                "note": "本题只记 out"
               }
             },
             "dims": {
@@ -17503,14 +17503,14 @@
                   131072
                 ],
                 "dtype": "torch.float32",
-                "note": "\u672c\u9898\u53ea\u8bb0 out"
+                "note": "本题只记 out"
               },
               "rstd": {
                 "shape": [
                   131072
                 ],
                 "dtype": "torch.float32",
-                "note": "\u672c\u9898\u53ea\u8bb0 out"
+                "note": "本题只记 out"
               }
             },
             "dims": {
@@ -19009,7 +19009,7 @@
                   7168
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "routed_scaling_factor": {
                 "scalar": 2.5
@@ -19084,7 +19084,7 @@
                   7168
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "routed_scaling_factor": {
                 "scalar": 2.5
@@ -19159,7 +19159,7 @@
                   7168
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "routed_scaling_factor": {
                 "scalar": 2.5
@@ -19234,7 +19234,7 @@
                   7168
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "routed_scaling_factor": {
                 "scalar": 2.5
@@ -19309,7 +19309,7 @@
                   7168
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "routed_scaling_factor": {
                 "scalar": 2.5
@@ -19381,7 +19381,7 @@
                   1024
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k": {
                 "shape": [
@@ -19389,7 +19389,7 @@
                   256
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "cos_sin_cache": {
                 "shape": [
@@ -19505,7 +19505,7 @@
                   1024
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k": {
                 "shape": [
@@ -19513,7 +19513,7 @@
                   256
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "cos_sin_cache": {
                 "shape": [
@@ -19629,7 +19629,7 @@
                   1024
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k": {
                 "shape": [
@@ -19637,7 +19637,7 @@
                   256
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "cos_sin_cache": {
                 "shape": [
@@ -19753,7 +19753,7 @@
                   1024
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "k": {
                 "shape": [
@@ -19761,7 +19761,7 @@
                   256
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "cos_sin_cache": {
                 "shape": [
@@ -19888,7 +19888,7 @@
                   9
                 ],
                 "dtype": "torch.int32",
-                "note": "cumsum([0]+[n]*8)\uff0cnum_groups+1"
+                "note": "cumsum([0]+[n]*8)，num_groups+1"
               },
               "m_alignment": {
                 "scalar": 1
@@ -19901,7 +19901,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u9010\u7ec4\u8f6c\u7f6e\u7ed3\u679c"
+                "note": "逐组转置结果"
               }
             },
             "dims": {
@@ -19963,7 +19963,7 @@
                   9
                 ],
                 "dtype": "torch.int32",
-                "note": "cumsum([0]+[n]*8)\uff0cnum_groups+1"
+                "note": "cumsum([0]+[n]*8)，num_groups+1"
               },
               "m_alignment": {
                 "scalar": 1
@@ -19976,7 +19976,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u9010\u7ec4\u8f6c\u7f6e\u7ed3\u679c"
+                "note": "逐组转置结果"
               }
             },
             "dims": {
@@ -20038,7 +20038,7 @@
                   9
                 ],
                 "dtype": "torch.int32",
-                "note": "cumsum([0]+[n]*8)\uff0cnum_groups+1"
+                "note": "cumsum([0]+[n]*8)，num_groups+1"
               },
               "m_alignment": {
                 "scalar": 1
@@ -20051,7 +20051,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u9010\u7ec4\u8f6c\u7f6e\u7ed3\u679c"
+                "note": "逐组转置结果"
               }
             },
             "dims": {
@@ -20113,7 +20113,7 @@
                   9
                 ],
                 "dtype": "torch.int32",
-                "note": "cumsum([0]+[n]*8)\uff0cnum_groups+1"
+                "note": "cumsum([0]+[n]*8)，num_groups+1"
               },
               "m_alignment": {
                 "scalar": 1
@@ -20126,7 +20126,7 @@
                   512
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u9010\u7ec4\u8f6c\u7f6e\u7ed3\u679c"
+                "note": "逐组转置结果"
               }
             },
             "dims": {
@@ -20188,7 +20188,7 @@
                   9
                 ],
                 "dtype": "torch.int32",
-                "note": "cumsum([0]+[n]*8)\uff0cnum_groups+1"
+                "note": "cumsum([0]+[n]*8)，num_groups+1"
               },
               "m_alignment": {
                 "scalar": 1
@@ -20201,7 +20201,7 @@
                   512
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u9010\u7ec4\u8f6c\u7f6e\u7ed3\u679c"
+                "note": "逐组转置结果"
               }
             },
             "dims": {
@@ -20263,7 +20263,7 @@
                   9
                 ],
                 "dtype": "torch.int32",
-                "note": "cumsum([0]+[n]*8)\uff0cnum_groups+1"
+                "note": "cumsum([0]+[n]*8)，num_groups+1"
               },
               "m_alignment": {
                 "scalar": 1
@@ -20276,7 +20276,7 @@
                   512
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u9010\u7ec4\u8f6c\u7f6e\u7ed3\u679c"
+                "note": "逐组转置结果"
               }
             },
             "dims": {
@@ -20338,7 +20338,7 @@
                   9
                 ],
                 "dtype": "torch.int32",
-                "note": "cumsum([0]+[n]*8)\uff0cnum_groups+1"
+                "note": "cumsum([0]+[n]*8)，num_groups+1"
               },
               "m_alignment": {
                 "scalar": 1
@@ -20351,7 +20351,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u9010\u7ec4\u8f6c\u7f6e\u7ed3\u679c"
+                "note": "逐组转置结果"
               }
             },
             "dims": {
@@ -20413,7 +20413,7 @@
                   9
                 ],
                 "dtype": "torch.int32",
-                "note": "cumsum([0]+[n]*8)\uff0cnum_groups+1"
+                "note": "cumsum([0]+[n]*8)，num_groups+1"
               },
               "m_alignment": {
                 "scalar": 1
@@ -20426,7 +20426,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u9010\u7ec4\u8f6c\u7f6e\u7ed3\u679c"
+                "note": "逐组转置结果"
               }
             },
             "dims": {
@@ -20488,7 +20488,7 @@
                   9
                 ],
                 "dtype": "torch.int32",
-                "note": "cumsum([0]+[n]*8)\uff0cnum_groups+1"
+                "note": "cumsum([0]+[n]*8)，num_groups+1"
               },
               "m_alignment": {
                 "scalar": 1
@@ -20501,7 +20501,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u9010\u7ec4\u8f6c\u7f6e\u7ed3\u679c"
+                "note": "逐组转置结果"
               }
             },
             "dims": {
@@ -22712,14 +22712,14 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "output_offset": {
                 "shape": [
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "[0, dq, dq+dkv, dq+2*dkv] \u7684 qkv \u5207\u7247\u504f\u79fb"
+                "note": "[0, dq, dq+dkv, dq+2*dkv] 的 qkv 切片偏移"
               },
               "max_qkv_out_dim": {
                 "scalar": 4096
@@ -22730,7 +22730,7 @@
                   6144
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               }
             },
             "outputs": {
@@ -22818,14 +22818,14 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "output_offset": {
                 "shape": [
                   4
                 ],
                 "dtype": "torch.int32",
-                "note": "[0, dq, dq+dkv, dq+2*dkv] \u7684 qkv \u5207\u7247\u504f\u79fb"
+                "note": "[0, dq, dq+dkv, dq+2*dkv] 的 qkv 切片偏移"
               },
               "max_qkv_out_dim": {
                 "scalar": 4096
@@ -22836,7 +22836,7 @@
                   6144
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               }
             },
             "outputs": {
@@ -23332,7 +23332,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u66f4\u65b0"
+                "note": "原地更新"
               },
               "x": {
                 "shape": [
@@ -23406,7 +23406,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               }
             },
             "outputs": {
@@ -23426,7 +23426,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u66f4\u65b0\u540e\u7684 state"
+                "note": "原地更新后的 state"
               }
             },
             "dims": {
@@ -23485,7 +23485,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u66f4\u65b0"
+                "note": "原地更新"
               },
               "x": {
                 "shape": [
@@ -23559,7 +23559,7 @@
                   64
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               }
             },
             "outputs": {
@@ -23579,7 +23579,7 @@
                   128
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u66f4\u65b0\u540e\u7684 state"
+                "note": "原地更新后的 state"
               }
             },
             "dims": {
@@ -23651,7 +23651,7 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "stack_num": {
                 "scalar": 1
@@ -23740,7 +23740,7 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "stack_num": {
                 "scalar": 1
@@ -23830,7 +23830,7 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "base_output": {
                 "shape": [
@@ -23838,7 +23838,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               }
             },
             "outputs": {
@@ -23923,7 +23923,7 @@
                 "dtype": "torch.bfloat16"
               },
               "batch_info": {
-                "note": "LoRABatchInfo\uff08seg_indptr/weight_indices/lora_ranks/scalings \u7b49 LoRA \u5206\u6bb5\u8def\u7531 metadata\uff09"
+                "note": "LoRABatchInfo（seg_indptr/weight_indices/lora_ranks/scalings 等 LoRA 分段路由 metadata）"
               },
               "base_output": {
                 "shape": [
@@ -23931,7 +23931,7 @@
                   4096
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               }
             },
             "outputs": {
@@ -24020,7 +24020,7 @@
               "global_scale": {
                 "shape": [],
                 "dtype": "torch.float32",
-                "note": "0-d \u6807\u91cf\u5f20\u91cf"
+                "note": "0-d 标量张量"
               },
               "bias": {
                 "shape": [
@@ -24124,7 +24124,7 @@
               "global_scale": {
                 "shape": [],
                 "dtype": "torch.float32",
-                "note": "0-d \u6807\u91cf\u5f20\u91cf"
+                "note": "0-d 标量张量"
               },
               "bias": {
                 "shape": [
@@ -24228,7 +24228,7 @@
               "global_scale": {
                 "shape": [],
                 "dtype": "torch.float32",
-                "note": "0-d \u6807\u91cf\u5f20\u91cf"
+                "note": "0-d 标量张量"
               },
               "bias": {
                 "shape": [
@@ -24332,7 +24332,7 @@
               "global_scale": {
                 "shape": [],
                 "dtype": "torch.float32",
-                "note": "0-d \u6807\u91cf\u5f20\u91cf"
+                "note": "0-d 标量张量"
               },
               "bias": {
                 "shape": [
@@ -24436,7 +24436,7 @@
               "global_scale": {
                 "shape": [],
                 "dtype": "torch.float32",
-                "note": "0-d \u6807\u91cf\u5f20\u91cf"
+                "note": "0-d 标量张量"
               },
               "bias": {
                 "shape": [
@@ -24532,7 +24532,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -24596,7 +24596,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -24660,7 +24660,7 @@
                   16384
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -24724,7 +24724,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -24788,7 +24788,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -24852,7 +24852,7 @@
                   16384
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -24916,7 +24916,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -24980,7 +24980,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -25044,7 +25044,7 @@
                   16384
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -25108,7 +25108,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -25172,7 +25172,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -25236,7 +25236,7 @@
                   16384
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -25300,7 +25300,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -25364,7 +25364,7 @@
                   8192
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -25428,7 +25428,7 @@
                   16384
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u524d\u534a x1 / \u540e\u534a x3"
+                "note": "前半 x1 / 后半 x3"
               }
             },
             "outputs": {
@@ -25506,7 +25506,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "masked_m": {
                 "shape": [
@@ -25586,7 +25586,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "masked_m": {
                 "shape": [
@@ -25666,7 +25666,7 @@
                   2048
                 ],
                 "dtype": "torch.bfloat16",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "masked_m": {
                 "shape": [
@@ -25742,7 +25742,7 @@
                   4096
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
@@ -25808,7 +25808,7 @@
                   32000
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
@@ -25874,7 +25874,7 @@
                   128256
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
@@ -25940,7 +25940,7 @@
                   4096
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
@@ -26006,7 +26006,7 @@
                   32000
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
@@ -26072,7 +26072,7 @@
                   128256
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
@@ -26138,7 +26138,7 @@
                   4096
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
@@ -26204,7 +26204,7 @@
                   32000
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
@@ -26270,7 +26270,7 @@
                   128256
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
@@ -26336,7 +26336,7 @@
                   4096
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
@@ -26402,7 +26402,7 @@
                   32000
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
@@ -26468,7 +26468,7 @@
                   128256
                 ],
                 "dtype": "torch.float32",
-                "note": "\u539f\u5730\u5199\u56de"
+                "note": "原地写回"
               },
               "final_logit_softcapping": {
                 "scalar": 30.0
