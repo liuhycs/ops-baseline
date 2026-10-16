@@ -88,3 +88,28 @@ PyTorch 算子集合来自固定版本的 FlagGems kernelgen-dev，覆盖范围�
 | **昇腾 / 海光等国产后端专属算子** | `group_list_cumsum`、`indexer_epilogue`、`lightning_indexer`、`kv_rmsnorm_rope_cache`、`sparse_attn_sharedkv`、`int8_einsum`、`fused_inv_rope_int8_quant` 等 | H800 **无对应 NV 原生 kernel**，`native()` 如实返回 None 跳过 | 无法在 H800 采集，属预期跳过（这些算子的验收数据来自昇腾/海光） |
 
 说明：被跳过的算子不影响其余算子采集（每个算子独立子进程）。`fused_marlin_moe_w4a16_int4` 因逐专家纯 Python 量化很慢，但其 shape 已与 benchmark 完全对齐（全 32 组档位），大 E 架构可能逼近 `--op-timeout`（缺省 1800s）；实跑若子进程超时，用 `--op-timeout` 调大或 `--blacklist` 跳过最大档单独处理。FLA 系算子（`chunk_gated_delta_rule_fwd`、`chunk_kda`）与 `fused_q_kv_rmsnorm` 的 `native()` 已改为多候选路径回退，兼容 `vllm.model_executor.layers.fla` / `vllm.third_party.flash_linear_attention` 等不同 vllm 布局。
+
+## 多卡动态采集
+
+```bash
+python tools/collect_baseline_nvidia.py --repo pytorch \
+  --devices 0,1,2,3,4,5,6,7 --output pytorch_h800.json
+# 使用完全相同的参数追加 --resume，跳过已完成算子，重试失败/跳过项
+```
+
+`--devices` 与 `--device` 互斥。填写 GPU 可见性 token（卡号或 UUID）；如果已有
+`CUDA_VISIBLE_DEVICES`，只能选择其中的 token，不把它们重新解释为逻辑卡号。
+每张卡有一个消费者，从共享队列动态领取算子；单算子仍通过原隔离采集器执行。
+超时/停止会清理该任务的整个进程组，包括 NCU 子进程。各卡使用独立报告目录。
+
+**最终结果只有 `--output` 指定的一个 JSON，不需要手动合并。** 主线程在每个任务状态
+变化时原子更新该文件。现有算子字段和 `_scaling_factors` 保留；`_environment` 是首个
+已返回任务的环境，`_environments` 按 GPU 保存环境，`_collection.tasks` 保存每个算子的
+卡号、状态和诊断路径。不要把 `_environment` 单独解释为所有卡的环境。
+`<output>.work/` 保存内部中间结果、日志和 NCU 报告，以便检查部分失败。
+
+NCU 未取得 kernel 指标的算子标记 `profiling_incomplete`；这也可能是没有 GPU kernel
+的主机/视图操作，需要查看日志，而不是视为测得零工作量。任意未完成任务使程序退出 1，
+但已完成和部分结果仍保存在统一 JSON。`--no-ncu` 模式不要求 NCU 指标。
+续跑要求相同算子选择、卡列表、采集参数和源码内容，防止混入不同版本的数据。
+运行前确认卡空闲；NCU 多进程是否并行以及实际吞吐受驱动/NCU 版本限制。

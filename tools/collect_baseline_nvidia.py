@@ -1196,6 +1196,7 @@ def collect_baseline(output_path, ncu_enabled=True,
     if failed:
         print(f"⚠ {len(failed)} 个算子子进程异常（已跳过，部分结果若有则保留）: "
               f"{', '.join(failed)}")
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
@@ -1205,12 +1206,15 @@ if __name__ == "__main__":
                         help="输出文件路径")
     parser.add_argument("--no-ncu", action="store_true",
                         help="跳过 NCU profiling（只测 latency）")
-    parser.add_argument("--report-dir", default="ncu_reports",
+    parser.add_argument("--report-dir", default=None,
                         help="NCU .ncu-rep 报告存放目录（可用 ncu-ui 打开）")
-    parser.add_argument("--device", default=None,
+    device_group = parser.add_mutually_exclusive_group()
+    device_group.add_argument("--device", default=None,
                         help="指定跑在哪张卡上（物理卡号，如 0 或 3）。经 "
                              "CUDA_VISIBLE_DEVICES 生效，主进程与 NCU 子进程一致；"
                              "缺省用默认设备")
+    device_group.add_argument("--devices", help="多卡动态队列，例如 0,1,2,3；与 --device 互斥")
+    parser.add_argument("--resume", action="store_true", help="续跑多卡采集，跳过已完成算子")
     parser.add_argument("--repo", default=DEFAULT_REPO,
                         help=f"算子来源 repo，决定扫描 ops/<repo>/ 下哪个目录的算子"
                              f"（如 vllm、sglang）；缺省 {DEFAULT_REPO}")
@@ -1239,6 +1243,18 @@ if __name__ == "__main__":
                         help="内部使用：子进程直采模式，在本进程内采集选中算子、"
                              "不再 spawn（由编排模式自动传入，勿手动使用）")
     args = parser.parse_args()
+    if args.devices is not None:
+        if args.check or args._worker:
+            parser.error("--devices cannot be combined with --check or --_worker")
+        if args.op_timeout <= 0:
+            parser.error("--op-timeout must be positive")
+        from collect_baseline_multi_gpu import collect
+        try:
+            sys.exit(collect(args))
+        except ValueError as exc:
+            parser.error(str(exc))
+    if args.resume:
+        parser.error("--resume requires --devices")
     if args.check:
         n_fail = check_ops(device=args.device,
                            only=_parse_name_list(args.ops),
@@ -1246,8 +1262,8 @@ if __name__ == "__main__":
                            blacklist=_parse_name_list(args.blacklist),
                            repo=args.repo)
         sys.exit(1 if n_fail else 0)
-    collect_baseline(args.output,
-                     ncu_enabled=not args.no_ncu, report_dir=args.report_dir,
+    exit_code = collect_baseline(args.output,
+                     ncu_enabled=not args.no_ncu, report_dir=args.report_dir or "ncu_reports",
                      device=args.device,
                      only=_parse_name_list(args.ops),
                      whitelist=_parse_name_list(args.whitelist),
@@ -1256,3 +1272,5 @@ if __name__ == "__main__":
                      op_timeout=args.op_timeout,
                      reference_chip=args.reference_chip,
                      repo=args.repo)
+
+    sys.exit(exit_code or 0)
