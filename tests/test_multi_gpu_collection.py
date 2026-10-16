@@ -90,6 +90,10 @@ class CollectionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             m.select_operators('pytorch', {'does-not-exist'})
 
+    def test_long_operator_selection_is_not_a_filename(self):
+        names = ['operator_' + str(i) for i in range(100)]
+        self.assertEqual(m.name_list(','.join(names)), set(names))
+
     def test_timeout_kills_descendants(self):
         import subprocess
         import sys

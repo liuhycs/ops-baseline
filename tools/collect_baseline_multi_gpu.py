@@ -45,7 +45,12 @@ def name_list(value):
     if value is None:
         return None
     path = Path(value)
-    content = path.read_text() if path.is_file() else value.replace(',', '\n')
+    # A comma-separated selection can exceed the filesystem filename limit.
+    try:
+        is_file = path.is_file()
+    except OSError:
+        is_file = False
+    content = path.read_text() if is_file else value.replace(',', '\n')
     return {s for line in content.splitlines() if (s := line.split('#')[0].strip())}
 
 
