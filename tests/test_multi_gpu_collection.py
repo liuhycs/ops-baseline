@@ -94,6 +94,105 @@ class CollectionTests(unittest.TestCase):
         names = ['operator_' + str(i) for i in range(100)]
         self.assertEqual(m.name_list(','.join(names)), set(names))
 
+    def test_failed_retry_preserves_partial_measurements_and_artifacts(self):
+        for retry_writes_partial in (False, True):
+            with self.subTest(retry_writes_partial=retry_writes_partial), \
+                 tempfile.TemporaryDirectory() as directory, \
+                 patch.dict(os.environ, {}, clear=True):
+                args = self.args(directory, devices='0', ops='abs')
+                original = {'shapes': {'[1]': {'fp32': {'num_kernels': 1}},
+                                       '[2]': {'fp32': {'num_kernels': 1}}}}
+                def initial(command, environment, log, timeout, stop):
+                    m.atomic_json(command[command.index('--output')+1], {'abs': original})
+                    return 1
+                self.assertEqual(m.collect(args, execute=initial), 1)
+                data = json.loads(Path(args.output).read_text())
+                first_result = Path(data['_collection']['tasks']['abs']['result'])
+                args.resume = True
+                def retry(command, environment, log, timeout, stop):
+                    if retry_writes_partial:
+                        m.atomic_json(command[command.index('--output')+1],
+                                      {'abs': {'shapes': {'[1]': original['shapes']['[1]']}}})
+                    return 1
+                self.assertEqual(m.collect(args, execute=retry), 1)
+                data = json.loads(Path(args.output).read_text())
+                self.assertEqual(data.get('abs'), original)
+                self.assertTrue(first_result.is_file())
+                task = data['_collection']['tasks']['abs']
+                self.assertNotEqual(task['result'], str(first_result))
+                self.assertEqual(task['retained_result']['result'], str(first_result))
+                self.assertEqual(len(task['previous_attempts']), 1)
+                replacement = {'shapes': dict(original['shapes'],
+                                              **{'[3]': {'fp32': {'num_kernels': 1}}})}
+                def successful_retry(command, environment, log, timeout, stop):
+                    current = json.loads(Path(args.output).read_text())
+                    # The checkpoint may still precede the running event; either
+                    # state must retain the old result's attribution.
+                    origin = current['_collection']['tasks']['abs']['retained_result']
+                    self.assertEqual(origin['result'], str(first_result))
+                    m.atomic_json(command[command.index('--output')+1], {'abs': replacement})
+                    return 0
+                self.assertEqual(m.collect(args, execute=successful_retry), 0)
+                data = json.loads(Path(args.output).read_text())
+                self.assertEqual(data['abs'], replacement)
+                self.assertTrue(first_result.is_file())
+                self.assertNotIn('retained_result', data['_collection']['tasks']['abs'])
+                self.assertEqual(len(data['_collection']['tasks']['abs']['previous_attempts']), 2)
+
+    def test_resume_clears_terminal_state_before_starting_worker(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
+            args = self.args(directory, devices='0', ops='abs')
+            self.assertEqual(m.collect(args, execute=lambda *unused: 'interrupted'), 1)
+            data = json.loads(Path(args.output).read_text())
+            data['_collection']['interrupted'] = True
+            m.atomic_json(args.output, data)
+            args.resume = True
+            def execute(command, environment, log, timeout, stop):
+                current = json.loads(Path(args.output).read_text())['_collection']
+                self.assertNotIn('finished_at_utc', current)
+                self.assertFalse(current['interrupted'])
+                m.atomic_json(command[command.index('--output')+1],
+                              {'abs': {'shapes': {'[1]': {'fp32': {'num_kernels': 1}}}}})
+                return 0
+            self.assertEqual(m.collect(args, execute=execute), 0)
+
+    def test_checkpoint_failure_stops_consumer_before_next_task(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
+            args = self.args(directory, devices='0')
+            calls, stopped = [], []
+            real_write = m.atomic_json
+            writes = 0
+            def checkpoint(path, data):
+                nonlocal writes
+                writes += 1
+                if writes == 2:
+                    raise OSError('simulated disk full')
+                real_write(path, data)
+            def execute(command, environment, log, timeout, stop):
+                calls.append(command[command.index('--ops')+1])
+                stopped.append(stop.wait(.5))
+                return 1
+            with patch.object(m, 'atomic_json', side_effect=checkpoint):
+                with self.assertRaisesRegex(OSError, 'disk full'):
+                    m.collect(args, execute=execute)
+            self.assertEqual(calls, ['abs'])
+            self.assertEqual(stopped, [True])
+
+    def test_custom_reports_are_isolated_by_full_output_path(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
+            reports = []
+            def execute(command, environment, log, timeout, stop):
+                reports.append(command[command.index('--report-dir')+1])
+                m.atomic_json(command[command.index('--output')+1],
+                              {'abs': {'shapes': {'[1]': {'fp32': {'num_kernels': 1}}}}})
+                return 0
+            for parent in ['a', 'b']:
+                args = self.args(directory, devices='0', ops='abs',
+                                 output=str(Path(directory)/parent/'data.json'),
+                                 report_dir=str(Path(directory)/'reports'))
+                self.assertEqual(m.collect(args, execute=execute), 0)
+            self.assertNotEqual(reports[0], reports[1])
+
     def test_timeout_kills_descendants(self):
         import subprocess
         import sys

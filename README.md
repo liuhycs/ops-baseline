@@ -107,3 +107,14 @@ than interpreting absent metrics as measured zeros. Non-completed tasks produce
 exit code 1 without discarding collected data. Resume requires matching source,
 operator selection, devices and settings. Use idle GPUs and verify profiling
 concurrency on the installed driver/NCU version before a large run.
+
+Retries use separate attempt directories, preserving previous logs, partial JSON
+and NCU reports. A failed retry cannot remove or downgrade the retained operator
+snapshot; the latest task includes `retained_result` provenance when older data
+is used, and `previous_attempts` records earlier outcomes. Snapshots from different
+attempts are not merged workload-by-workload. A new snapshot replaces the old one
+only when it retains every existing workload and its profiler evidence.
+Resume clears terminal flags before work begins and records `attempt_started_at_utc`.
+Coordinator/checkpoint failures stop consumers before waiting for process cleanup.
+Custom `--report-dir` paths include a digest of the full output path and an attempt
+ID, so identically named outputs in separate directories do not overwrite reports.

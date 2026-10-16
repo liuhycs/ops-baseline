@@ -19,6 +19,7 @@ import subprocess
 import sys
 import threading
 import time
+import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -110,6 +111,62 @@ def collect(args, *, execute=run_process):
         return _collect(args, execute=execute)
 
 
+def record_quality(entry):
+    """Identify measured workloads and whether each has profiler evidence."""
+    return {(shape, dtype): bool(record.get('num_kernels'))
+            for shape, values in entry.get('shapes', {}).items()
+            for dtype, record in values.items()}
+
+
+def covers_previous(previous, current):
+    old, new = record_quality(previous), record_quality(current)
+    return old.keys() <= new.keys() and all(not profiled or new[key]
+                                           for key, profiled in old.items())
+
+
+def report_directory(report_root, output, operator, attempt_directory):
+    if not report_root:
+        return attempt_directory / 'ncu_reports'
+    # Basenames alone collide for /run/a/data.json and /run/b/data.json.
+    digest = hashlib.sha256(str(output).encode()).hexdigest()[:16]
+    namespace = f'{output.name[:80]}-{digest}'
+    return Path(report_root).resolve() / namespace / operator / attempt_directory.name
+
+
+def merge_event(results, origins, name, record, data):
+    """Checkpoint latest task state without degrading a retained result snapshot.
+
+    Running events have data=None; terminal events carry the child JSON (possibly
+    empty after failure). Attempts are kept separately rather than mixing records
+    collected on different GPUs/environments into one operator entry.
+    """
+    previous = results['_collection']['tasks'].get(name, {})
+    history = list(previous.get('previous_attempts', []))
+    if data is None and previous:
+        history.append({key: value for key, value in previous.items()
+                        if key != 'previous_attempts'})
+    if history:
+        record['previous_attempts'] = history
+    if data is None and name in results:
+        record['retained_result'] = origins[name]
+    if data is not None:
+        candidate = data.get(name)
+        if candidate is not None and (name not in results or
+                                       covers_previous(results[name], candidate)):
+            results[name] = candidate
+            origins[name] = {'device': record['device'], 'result': record['result'],
+                             'environment': data.get('_environment')}
+        elif name in results:
+            record['retained_result'] = origins[name]
+        if '_environment' in data:
+            results['_environments'][record['device']] = data['_environment']
+            results.setdefault('_environment', data['_environment'])
+        if '_scaling_factors' in data:
+            results['_scaling_factors'] = data['_scaling_factors']
+        print(f"[{record['device']}] {name}: {record['status']}", flush=True)
+    results['_collection']['tasks'][name] = record
+
+
 def _collect(args, *, execute=run_process):
     if not math.isfinite(args.op_timeout) or args.op_timeout <= 0:
         raise ValueError("--op-timeout must be finite and positive")
@@ -137,11 +194,19 @@ def _collect(args, *, execute=run_process):
                    'started_at_utc': datetime.now(timezone.utc).isoformat(), 'tasks': {}},
                    '_environments': {}}
     tasks = results['_collection']['tasks']
+    origins = {name: task.get('retained_result') or {
+        'device': task.get('device'), 'result': task.get('result'),
+        'environment': results['_environments'].get(task.get('device'))}
+        for name, task in tasks.items() if name in results}
     pending = queue.Queue()
     for name in names:
         if tasks.get(name, {}).get('status') != 'completed':
             pending.put(name)
     work.mkdir(parents=True, exist_ok=True)
+    collection = results['_collection']
+    collection.pop('finished_at_utc', None)
+    collection['interrupted'] = False
+    collection['attempt_started_at_utc'] = datetime.now(timezone.utc).isoformat()
     atomic_json(output, results)
     stop = threading.Event()
     events = queue.Queue()
@@ -152,19 +217,19 @@ def _collect(args, *, execute=run_process):
                 name = pending.get_nowait()
             except queue.Empty:
                 return
-            folder = work / name
+            folder = work / name / uuid.uuid4().hex
             folder.mkdir(parents=True, exist_ok=True)
             part = folder / 'result.json'
-            part.unlink(missing_ok=True)
             command = [sys.executable, str(ROOT / 'tools' / 'collect_baseline_nvidia.py'),
                        '--repo', args.repo, '--ops', name, '--output', str(part),
-                       '--report-dir', str((Path(args.report_dir).resolve() / output.name / name)
-                                           if getattr(args, 'report_dir', None) else folder / 'ncu_reports'),
+                       '--report-dir', str(report_directory(getattr(args, 'report_dir', None),
+                                                          output, name, folder)),
                        '--op-timeout', str(args.op_timeout), '--reference-chip', args.reference_chip]
             if args.no_ncu:
                 command.append('--no-ncu')
             environment = dict(os.environ, CUDA_VISIBLE_DEVICES=device, PYTHONUNBUFFERED='1')
-            events.put((name, {'status': 'running', 'device': device}, None))
+            events.put((name, {'status': 'running', 'device': device,
+                               'log': str(folder / 'collector.log'), 'result': str(part)}, None))
             try:
                 code = execute(command, environment, folder / 'collector.log',
                                args.op_timeout + 120, stop)
@@ -192,26 +257,24 @@ def _collect(args, *, execute=run_process):
     try:
         with ThreadPoolExecutor(max_workers=len(devices)) as pool:
             futures = [pool.submit(consume, device) for device in devices]
-            while not all(f.done() for f in futures) or not events.empty():
-                try:
-                    name, record, data = events.get(timeout=.2)
-                except queue.Empty:
-                    continue
-                tasks[name] = record
-                if data is not None:
-                    if name in data:
-                        results[name] = data[name]
-                    else:
-                        results.pop(name, None)
-                    if '_environment' in data:
-                        results['_environments'][record['device']] = data['_environment']
-                        results.setdefault('_environment', data['_environment'])
-                    if '_scaling_factors' in data:
-                        results['_scaling_factors'] = data['_scaling_factors']
-                    print(f"[{record['device']}] {name}: {record['status']}", flush=True)
-                atomic_json(output, results)
-            for future in futures:
-                future.result()
+            try:
+                while not all(f.done() for f in futures) or not events.empty():
+                    for future in futures:
+                        if future.done():
+                            future.result()
+                    try:
+                        name, record, data = events.get(timeout=.2)
+                    except queue.Empty:
+                        continue
+                    merge_event(results, origins, name, record, data)
+                    atomic_json(output, results)
+                for future in futures:
+                    future.result()
+            except BaseException:
+                # Set this before executor.__exit__ joins the consumers. Otherwise
+                # a broken checkpoint leaves them draining the entire GPU queue.
+                stop.set()
+                raise
     finally:
         for signum, handler in previous.items():
             signal.signal(signum, handler)
