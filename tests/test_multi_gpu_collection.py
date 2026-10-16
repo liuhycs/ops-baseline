@@ -90,6 +90,21 @@ class CollectionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             m.select_operators('pytorch', {'does-not-exist'})
 
+    def test_partial_metrics_remain_incomplete_and_cannot_replace_measured_fields(self):
+        old = {'shapes': {'[1]': {'fp32': {'num_kernels': 1, 'B_mem': 64}}}}
+        new = {'shapes': {'[1]': {'fp32': {'num_kernels': 1, 'B_mem': None,
+                                         'ncu_status': 'partial'}}}}
+        self.assertFalse(m.covers_previous(old, new))
+        self.assertTrue(m.covers_previous(new, old))
+        def execute(command, environment, log, timeout, stop):
+            m.atomic_json(command[command.index('--output')+1], {'abs': new})
+            return 0
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
+            args = self.args(directory, ops='abs', devices='0')
+            self.assertEqual(m.collect(args, execute=execute), 1)
+            result = json.loads(Path(args.output).read_text())
+            self.assertEqual(result['_collection']['tasks']['abs']['status'], 'profiling_incomplete')
+
     def test_long_operator_selection_is_not_a_filename(self):
         names = ['operator_' + str(i) for i in range(100)]
         self.assertEqual(m.name_list(','.join(names)), set(names))

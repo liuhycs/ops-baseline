@@ -112,16 +112,24 @@ def collect(args, *, execute=run_process):
 
 
 def record_quality(entry):
-    """Identify measured workloads and whether each has profiler evidence."""
-    return {(shape, dtype): bool(record.get('num_kernels'))
-            for shape, values in entry.get('shapes', {}).items()
-            for dtype, record in values.items()}
+    """Retain measured fields as well as workload/kernel coverage across retries."""
+    quality = {}
+    for shape, values in entry.get('shapes', {}).items():
+        for dtype, record in values.items():
+            fields = {'T_us'} if record.get('T_us') is not None else set()
+            if record.get('num_kernels'):
+                fields.add('kernels')
+                fields.update(k for k in ('F_cuda', 'F_tensor', 'B_mem', 'U_cuda',
+                                           'U_tensor', 'U_mem', 'sm_utilization')
+                              if record.get(k) is not None)
+            quality[shape, dtype] = fields
+    return quality
 
 
 def covers_previous(previous, current):
     old, new = record_quality(previous), record_quality(current)
-    return old.keys() <= new.keys() and all(not profiled or new[key]
-                                           for key, profiled in old.items())
+    return old.keys() <= new.keys() and all(fields <= new[key]
+                                           for key, fields in old.items())
 
 
 def report_directory(report_root, output, operator, attempt_directory):
@@ -240,7 +248,10 @@ def _collect(args, *, execute=run_process):
                     records = [r for shape in entry.get('shapes', {}).values() for r in shape.values()]
                     if not records:
                         status = 'skipped'
-                    elif not args.no_ncu and any(not r.get('num_kernels') for r in records):
+                    elif not args.no_ncu and any(
+                            not r.get('num_kernels') or
+                            r.get('ncu_status', 'collected') != 'collected'
+                            for r in records):
                         status = 'profiling_incomplete'
                 record = {'status': status, 'device': device, 'returncode': code,
                           'log': str(folder / 'collector.log'), 'result': str(part)}

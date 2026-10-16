@@ -51,7 +51,7 @@ Create a module under `ops/<repo>/` (e.g. `ops/vllm/`, or `ops/sglang/` for sgla
 
 | Field | Meaning | Unit |
 |---|---|---|
-| `T_us` | kernel runtime T | us |
+| `T_us` | native-call latency T (independent of NCU) | us |
 | `F_cuda` / `F_tensor` | CUDA / Tensor Core actual compute | FLOP |
 | `B_mem` | Global Memory actual traffic | Byte |
 | `U_cuda` / `U_tensor` / `U_mem` | per-unit hardware utilization | % (0–100) |
@@ -59,12 +59,44 @@ Create a module under `ops/<repo>/` (e.g. `ops/vllm/`, or `ops/sglang/` for sgla
 | `num_kernels` / `per_kernel` | kernels per call / per-kernel breakdown | — |
 | `config` | real input/output shapes (complex ops) | — |
 
-Plus a set of redundant legacy-compatible fields (`flops_*`, `util_*`, `bottleneck`, …) with identical values.
+Plus redundant legacy-named fields (`flops_*`, `util_*`, `bottleneck`, …) with identical values. Missing NCU values are now `null` in both the canonical and legacy fields; numeric zero is reserved for counters that actually measured zero. Consumers must handle nullable metrics.
+
+Each record includes `ncu_status`, `ncu_reason`, `ncu_diagnostic`, `ncu_scope`
+and `metric_validity` (field name → validity):
+
+| `ncu_status` | Meaning |
+| --- | --- |
+| `collected` | All requested counters were read for every profiled kernel. |
+| `partial` | Kernels were profiled, but some requested counters are absent, non-numeric or non-finite. Affected aggregate fields are `null`, not partial sums. |
+| `no_kernel` | NCU exited successfully and explicitly reported “No kernels were profiled” in the selected NVTX scope. This does not prove the whole process launched no kernels, nor distinguish memcpy, a view/no-op and a filter mismatch. |
+| `failed` | Export/import failed, timed out, or produced no usable report/rows without explicit no-kernel evidence. |
+| `disabled` | Collection used `--no-ncu`. |
+
+`metric_validity` values are `measured`, `derived` (bottleneck utilization),
+`estimated` (per-kernel `T_us` allocated from end-to-end latency), `not_collected`
+(no Tensor Core FLOP counter selected for this dtype), or `unavailable`.
+`T_us` / `latency_ms` remain independently measured even if NCU is unavailable.
+Per-kernel entries carry their own validity map; time allocation is unavailable
+when multiple kernels lack usable duration weights. An unknown dtype's Tensor
+Core FLOPs are `null`, rather than an assumed zero.
+
+For example, compare latency when `record['metric_validity']['T_us'] == 'measured'`;
+only include `U_mem` in utilization statistics when its validity is `measured`.
+Never use `record.get('U_mem') or 0` to fill missing values. Validate per record,
+not by discarding all records of an operator marked `profiling_incomplete`.
+No-kernel and partial/failed records still produce `profiling_incomplete` at task
+level under the conservative completeness policy; that status does not invalidate
+their independently measured latency or other measured fields.
+
+Older JSON files have no validity fields and may contain placeholder zeros.
+They are not automatically migrated, and a missing report alone must not be
+retroactively classified as `no_kernel`. Updating this code does not modify a
+running collection or its output.
 
 
 The top-level `_environment` object records the actual GPU name, UUID, memory in bytes, compute capability, SM count, logical CUDA device index and driver; CPU information; OS, Python, Torch/Triton/vLLM/SGLang, Torch build CUDA, nvcc and NCU versions; UTC collection time; collector Git commit, branch and dirty status; and effective run settings and selected operators. Only `CUDA_VISIBLE_DEVICES` and `CUDA_DEVICE_ORDER` environment variables are captured. Unavailable fields are `null`; probe failures do not interrupt collection.
 
-Metadata is saved before the first operator and preserved by incremental writes. Internal workers do not repeat probes. `_scaling_factors.reference_chip` is the configured scaling reference; the actual device is under `_environment.hardware.gpu`. Consumers should skip all top-level keys starting with `_` when iterating operators. CPU fields include model, architecture, sockets, physical cores, logical CPUs, threads per core, NUMA nodes, process CPU affinity count, and hypervisor vendor. Topology reflects the OS-visible system, not necessarily physical host topology in a VM; affinity count does not represent cgroup CPU quota. Missing lscpu fields are null. Driver lookup normalizes bare Torch UUIDs and falls back only to a consistent host-wide driver version. Triton uses the imported runtime version first, including pytorch-triton/FlagTree installations.
+Metadata is saved before the first operator and preserved by incremental writes. Internal workers do not repeat probes. `_scaling_factors.reference_chip` is the configured scaling reference; the actual device is under `_environment.hardware.gpu`. Consumers should identify operator entries by their `shapes` object; operator names such as `_reshape_alias_copy` also start with `_`. CPU fields include model, architecture, sockets, physical cores, logical CPUs, threads per core, NUMA nodes, process CPU affinity count, and hypervisor vendor. Topology reflects the OS-visible system, not necessarily physical host topology in a VM; affinity count does not represent cgroup CPU quota. Missing lscpu fields are null. Driver lookup normalizes bare Torch UUIDs and falls back only to a consistent host-wide driver version. Triton uses the imported runtime version first, including pytorch-triton/FlagTree installations.
 
 ## Environment & configuration (full H800 collection)
 
