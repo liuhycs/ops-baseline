@@ -32,6 +32,21 @@ def run(args):
         if supplement.exists() or output.exists():
             raise ValueError('supplement/final output already exists; refusing another run')
         finished(json.loads(base.read_text()))
+        # The running legacy annotation performs a conservative container-wide
+        # collector check before replacement. Let it finish before launching GPUs.
+        state('waiting_for_base_validity_before_collection')
+        deadline = time.monotonic() + args.wait_hours * 3600
+        previous_mtime = None
+        while True:
+            mtime = base.stat().st_mtime_ns
+            if mtime != previous_mtime:
+                if '_metric_validity_migration' in json.loads(base.read_text()):
+                    break
+                previous_mtime = mtime
+            if time.monotonic() >= deadline:
+                state('failed', error='base annotation has not finished; collection not started')
+                raise TimeoutError('base annotation has not finished; collection not started')
+            time.sleep(60)
         command = [sys.executable, '-u', str(Path(__file__).with_name('collect_baseline_nvidia.py')),
                    '--repo', args.repo, '--devices', args.devices, '--ops', args.ops,
                    '--op-timeout', str(args.op_timeout), '--ncu-timeout', str(args.ncu_timeout),
@@ -41,19 +56,6 @@ def run(args):
             result = subprocess.run(command)
             # Nonzero exit can still contain useful partial records; never call it complete.
             finished(json.loads(supplement.read_text()))
-            state('waiting_for_base_validity', collection_returncode=result.returncode)
-            deadline = time.monotonic() + args.wait_hours * 3600
-            previous_mtime = None
-            while True:
-                mtime = base.stat().st_mtime_ns
-                if mtime != previous_mtime:
-                    data = json.loads(base.read_text())
-                    if '_metric_validity_migration' in data:
-                        break
-                    previous_mtime = mtime
-                if time.monotonic() >= deadline:
-                    raise TimeoutError('base annotation has not finished; supplemental data retained')
-                time.sleep(60)
             state('merging', collection_returncode=result.returncode)
             summary = merge_files(base, supplement, output)
             state('finished', collection_returncode=result.returncode,

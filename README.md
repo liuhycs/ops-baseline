@@ -182,9 +182,9 @@ is forwarded to isolated workers and recorded in resume settings. For example,
 use `--op-timeout 14400 --ncu-timeout 1800` for a larger targeted retry.
 
 `tools/collect_baseline_supplement.py --base BASE --supplement RETRY --output FINAL
---ops CSV --devices 0,1,2,3,4,5,6,7` collects the selected operators separately
-with these larger defaults, then waits for BASE's existing offline annotation
-to finish. It does not restart that annotation or overwrite either source.
+--ops CSV --devices 0,1,2,3,4,5,6,7` waits for BASE's existing offline annotation to finish, then collects the
+selected operators separately with these larger defaults. This ordering respects
+the annotation's conservative live-collector check. It does not restart that annotation or overwrite either source.
 It writes a pipeline status beside FINAL and automatically merges into one new
 JSON. `tools/merge_baseline_supplement.py` is also available for an explicit merge.
 Complete base records remain unchanged; a retry may add missing keys or upgrade

@@ -64,6 +64,13 @@ class MergeTests(unittest.TestCase):
             base, retry, final = [Path(directory) / (n + '.json') for n in ('base', 'retry', 'final')]
             base.write_text(json.dumps(self.data()))
             original = base.read_bytes()
+            waiting = self.data()
+            waiting.pop('_metric_validity_migration')
+            base.write_text(json.dumps(waiting))
+            def annotation_finished(seconds):
+                # A GPU collector must not have started while the old migration runs.
+                self.assertFalse(retry.exists())
+                base.write_bytes(original)
             def collect(command):
                 self.assertEqual(command[command.index('--ncu-timeout')+1], '1800')
                 self.assertEqual(command[command.index('--op-timeout')+1], '14400')
@@ -74,7 +81,8 @@ class MergeTests(unittest.TestCase):
             args = SimpleNamespace(base=str(base), supplement=str(retry), output=str(final),
                                    repo='pytorch', devices='0,1,2,3,4,5,6,7', ops='_op',
                                    op_timeout=14400, ncu_timeout=1800, wait_hours=24)
-            with patch.object(pipeline.subprocess, 'run', side_effect=collect):
+            with patch.object(pipeline.subprocess, 'run', side_effect=collect), \
+                 patch.object(pipeline.time, 'sleep', side_effect=annotation_finished):
                 pipeline.run(args)
             self.assertEqual(base.read_bytes(), original)
             self.assertEqual(json.loads(final.with_suffix('.json.pipeline.json').read_text())['phase'], 'finished')

@@ -154,6 +154,6 @@ CUDA_VISIBLE_DEVICES= python tools/annotate_baseline_validity.py \
 
 `--ncu-timeout` 设置单次 NCU export 超时（默认 600 秒），与整算子的 `--op-timeout`（默认 1800 秒）独立；该值传给隔离 worker 并纳入续跑配置。定向补采可使用 `--op-timeout 14400 --ncu-timeout 1800`。
 
-`tools/collect_baseline_supplement.py --base BASE --supplement RETRY --output FINAL --ops CSV --devices 0,1,2,3,4,5,6,7` 用上述放宽的默认值单独采集指定算子，等待 BASE 已启动的离线有效性补充结束后，自动合并到一个新的最终 JSON；不重启迁移，也不覆盖两个来源文件。FINAL 旁的 pipeline JSON 记录当前阶段。也可直接使用 `tools/merge_baseline_supplement.py`。
+`tools/collect_baseline_supplement.py --base BASE --supplement RETRY --output FINAL --ops CSV --devices 0,1,2,3,4,5,6,7` 先等待 BASE 已启动的离线有效性补充结束（该迁移在替换前会检查容器内有无运行中的采集），再用上述放宽的默认值单独采集指定算子，最后自动合并到一个新的最终 JSON；不重启迁移，也不覆盖两个来源文件。FINAL 旁的 pipeline JSON 记录当前阶段。也可直接使用 `tools/merge_baseline_supplement.py`。
 
 合并保留原先完整成功的记录不变，只添加缺失项或升级不丢失原有实测字段的不完整记录；输入配置不一致则拒绝合并。新增/升级记录保存补采设备与环境来源。原采集历史保持不变，`_supplemental_merge` 记录来源哈希、补采运行信息、有效任务状态与计数及最终 NCU 状态统计；补采失败仍可贡献部分数据，但不能标成成功。
