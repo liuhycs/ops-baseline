@@ -71,6 +71,7 @@ and `metric_validity` (field name → validity):
 | `no_kernel` | NCU exited successfully and explicitly reported “No kernels were profiled” in the selected NVTX scope. This does not prove the whole process launched no kernels, nor distinguish memcpy, a view/no-op and a filter mismatch. |
 | `failed` | Export/import failed, timed out, or produced no usable report/rows without explicit no-kernel evidence. |
 | `disabled` | Collection used `--no-ncu`. |
+| `unknown` | Offline migration lacks enough historical evidence to determine the original NCU outcome. |
 
 `metric_validity` values are `measured`, `derived` (bottleneck utilization),
 `estimated` (per-kernel `T_us` allocated from end-to-end latency), `not_collected`
@@ -150,3 +151,25 @@ Resume clears terminal flags before work begins and records `attempt_started_at_
 Coordinator/checkpoint failures stop consumers before waiting for process cleanup.
 Custom `--report-dir` paths include a digest of the full output path and an attempt
 ID, so identically named outputs in separate directories do not overwrite reports.
+
+## Offline annotation of finished legacy JSON
+
+```bash
+CUDA_VISIBLE_DEVICES= python tools/annotate_baseline_validity.py \
+  --input /absolute/path/to/finished.json --workers 4
+```
+
+Run from a separate checkout after all collection writers have exited. The tool
+requires terminal states for every selected operator, checks live collector/NCU
+processes, and holds the existing output lock. It creates a read-only, hash-named
+original backup before processing. It only imports existing NCU reports on CPU;
+it never exports reports or executes a GPU workload. Explicit per-record legacy
+NCU failure diagnostics yield `failed`; absent reports without such evidence
+yield `unknown` / `legacy_reason_unknown`, not an inferred `no_kernel`.
+
+Before atomic replacement it validates unchanged operator/shape/dtype keys,
+latencies, input configurations and collection/environment metadata, strict JSON,
+field validity, idle processes, and an unchanged source SHA256. Original task
+statuses remain historical. `_metric_validity_migration` records the tool/parser
+version and hashes, input SHA256, backup path, timestamp and status counts; each
+record records its report hash or legacy evidence. A second migration is refused.

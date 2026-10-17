@@ -77,6 +77,7 @@ PyTorch 算子集合来自固定版本的 FlagGems kernelgen-dev，覆盖范围�
 | `no_kernel` | NCU 成功退出且明确输出 “No kernels were profiled”；仅表示选定 NVTX 范围未采到 kernel，不能据此区分 memcpy、view/no-op 和过滤条件不匹配。 |
 | `failed` | 导出/导入失败、超时，或缺少有效报告/记录且没有明确的无 kernel 证据。 |
 | `disabled` | 本次使用 `--no-ncu`。 |
+| `unknown` | 离线迁移时历史证据不足，无法确定原始 NCU 结果。 |
 
 `metric_validity` 的值包括：`measured`（实测）、`derived`（瓶颈利用率由实测利用率推导）、`estimated`（逐 kernel 的 `T_us` 由端到端延迟分摊）、`not_collected`（该 dtype 没有选定 Tensor Core FLOP counter）、`unavailable`（不可用）。逐 kernel 明细也有自己的有效性映射；多 kernel 缺少可用 duration 权重时不分摊耗时。未请求的 Tensor Core FLOP 为 `null`，不假定为零。
 
@@ -137,3 +138,14 @@ NCU 未取得 kernel 指标的算子标记 `profiling_incomplete`；这也可能
 证据时才替换。续跑开始前清除终止标记，并记录 `attempt_started_at_utc`。
 协调器或落盘发生异常时先停止消费者，再等待进程清理。自定义 `--report-dir`
 使用完整输出路径的摘要与尝试 ID 隔离，避免不同目录的同名输出互相覆盖报告。
+
+## 已结束采集的离线有效性补充
+
+```bash
+CUDA_VISIBLE_DEVICES= python tools/annotate_baseline_validity.py \
+  --input /absolute/path/to/finished.json --workers 4
+```
+
+从独立 checkout 运行。工具要求所有选中算子均有终态，检查残留采集/NCU进程并持有原输出锁，先创建以输入哈希命名的只读原始备份，再在 CPU 上导入已有 NCU 报告；不会执行 export 或 GPU workload。能与具体记录对应的明确 NCU 失败日志标 `failed`，没有报告且缺乏明确证据的标 `unknown` / `legacy_reason_unknown`，不猜测为 `no_kernel`。
+
+原子替换前检查算子/shape/dtype、延迟、输入配置、采集历史及环境元数据保持不变，验证严格 JSON、字段有效性、无运行中的写者，以及原始输入 SHA256 未变。`_metric_validity_migration` 记录工具/parser 版本与哈希、输入哈希、备份路径、时间和状态统计；每条记录保存报告哈希或历史证据。拒绝重复迁移。

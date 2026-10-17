@@ -566,96 +566,105 @@ def profile_with_ncu(op_name, profile_script, shape, dtype_str,
                   f"{_err_msg(imp)}")
             return _empty_result(report_path, reason='import_failed', diagnostic=_err_msg(imp))
 
-        agg = _parse_ncu_csv(imp.stdout, metrics)
-        num_kernels = len(agg.get(KERNEL_NAME_COL, []))
-        if not num_kernels:
-            return _empty_result(report_path, reason='no_kernel_rows', diagnostic=_err_msg(imp))
-
-        def complete(m):
-            vals = agg.get(m, [])
-            return len(vals) == num_kernels and all(v is not None for v in vals)
-
-        def total(m):
-            return sum(agg[m]) if complete(m) else None
-
-        def mean_pct(m):
-            vals = agg.get(m, [])
-            return sum(vals) / len(vals) / 100.0 if complete(m) else None
-
-        flops_cuda = (sum(w * total(m) for m, w in FLOP_CUDA_CORE.items())
-                      if all(complete(m) for m in FLOP_CUDA_CORE) else None)
-        flops_tensor = total(tensor_metric)
-        mem_bytes = total(MEMORY_BYTES)
-        # util：0-1 口径（旧字段沿用）；bottleneck 取三维最大者。
-        util = {dim: mean_pct(name) for dim, name in UTIL.items()}
-        # A missing utilization dimension prevents a reliable maximum comparison.
-        bottleneck = (max(util, key=util.get)
-                      if all(v is not None for v in util.values()) else None)
-        if bottleneck and util[bottleneck] == 0.0:
-            bottleneck = None
-
-        # 文档口径：U_* 用百分比（0-100），瓶颈单元名映射为 cuda/tensor/mem。
-        _unit = {"cuda_core": "cuda", "tensor_core": "tensor",
-                 "memory_bw": "mem"}
-        def pct(value):
-            return value * 100.0 if value is not None else None
-
-        U_cuda = pct(util["cuda_core"])
-        U_tensor = pct(util["tensor_core"])
-        U_mem = pct(util["memory_bw"])
-        bottle_util = (max(util.values()) if all(v is not None for v in util.values())
-                       else None)
-        U_bottle = pct(bottle_util)
-
-        # per_kernel 明细：一次 native 调用可能启动多个 kernel（MoE 的
-        # gather/gemm/scatter 等）。汇总口径下 bottle_neck_unit 会被便宜的小
-        # kernel 带偏，故逐 kernel 保留 F/B/U，便于按耗时加权或逐 kernel 判瓶颈。
-        # T_us 由采集侧的 do_bench 端到端测得后按 GPU duration 比例拆到各 kernel。
-        per_kernel = _build_per_kernel(agg, tensor_metric)
-
-        result = {
-            # —— 文档口径字段（对齐 参考.md 符号列表）——
-            "F_cuda": flops_cuda,            # F_cuda  (FLOP)
-            "F_tensor": flops_tensor,        # F_tensor(FLOP)
-            "B_mem": mem_bytes,              # B_mem   (Byte)
-            "U_cuda": U_cuda,                # U_cuda  (%)
-            "U_tensor": U_tensor,            # U_tensor(%)
-            "U_mem": U_mem,                  # U_mem   (%)
-            "U_bottle_neck": U_bottle,       # U_bottle_neck (%)
-            "bottle_neck_unit": _unit.get(bottleneck),  # cuda/tensor/mem/None
-            "num_kernels": len(per_kernel),  # NVTX range 内 kernel 数
-            "per_kernel": per_kernel,        # 逐 kernel 明细（多 kernel 算子）
-            # —— 兼容旧字段（同值冗余）——
-            "flops_cuda_core": flops_cuda,
-            "flops_tensor_core": flops_tensor,
-            "memory_bytes": mem_bytes,
-            "util_cuda_core": util["cuda_core"],
-            "util_tensor_core": util["tensor_core"],
-            "util_memory_bw": util["memory_bw"],
-            "bottleneck": bottleneck,
-            "bottleneck_util": bottle_util,
-            "cuda_flops": flops_cuda,
-            "sm_utilization": mean_pct(SM_UTIL),
-            "report_path": report_path,
-        }
-        result['metric_validity'] = _metric_validity(result)
-        for field in ('U_bottle_neck', 'bottleneck_util'):
-            if result[field] is not None:
-                result['metric_validity'][field] = 'derived'
-        if tensor_metric is None:
-            for field in ('F_tensor', 'flops_tensor_core'):
-                result['metric_validity'][field] = 'not_collected'
-        missing = [m for m in metrics if not complete(m)]
-        result.update(ncu_status='partial' if missing else 'collected',
-                      ncu_reason='missing_metrics' if missing else None,
-                      ncu_diagnostic=('Missing/non-numeric metrics: ' + ', '.join(missing)) if missing else None,
-                      ncu_scope='nvtx:kiro_target')
-        return result
+        return parse_ncu_report(imp.stdout, dtype_str, report_path)
     finally:
         try:
             Path(script_path).unlink()
         except OSError:
             pass
+
+
+def parse_ncu_report(csv_text, dtype_str, report_path):
+    """Parse an offline NCU import without executing the target workload."""
+    tensor_metric = FLOP_TENSOR_CORE.get(dtype_str)
+    metrics = list(FLOP_CUDA_CORE) + [MEMORY_BYTES, *UTIL.values(), SM_UTIL, DURATION]
+    if tensor_metric:
+        metrics.append(tensor_metric)
+    agg = _parse_ncu_csv(csv_text, metrics)
+    num_kernels = len(agg.get(KERNEL_NAME_COL, []))
+    if not num_kernels:
+        return _empty_result(report_path, reason='no_kernel_rows', diagnostic=csv_text[:2000])
+
+    def complete(m):
+        vals = agg.get(m, [])
+        return len(vals) == num_kernels and all(v is not None for v in vals)
+
+    def total(m):
+        return sum(agg[m]) if complete(m) else None
+
+    def mean_pct(m):
+        vals = agg.get(m, [])
+        return sum(vals) / len(vals) / 100.0 if complete(m) else None
+
+    flops_cuda = (sum(w * total(m) for m, w in FLOP_CUDA_CORE.items())
+                  if all(complete(m) for m in FLOP_CUDA_CORE) else None)
+    flops_tensor = total(tensor_metric)
+    mem_bytes = total(MEMORY_BYTES)
+    # util：0-1 口径（旧字段沿用）；bottleneck 取三维最大者。
+    util = {dim: mean_pct(name) for dim, name in UTIL.items()}
+    # A missing utilization dimension prevents a reliable maximum comparison.
+    bottleneck = (max(util, key=util.get)
+                  if all(v is not None for v in util.values()) else None)
+    if bottleneck and util[bottleneck] == 0.0:
+        bottleneck = None
+
+    # 文档口径：U_* 用百分比（0-100），瓶颈单元名映射为 cuda/tensor/mem。
+    _unit = {"cuda_core": "cuda", "tensor_core": "tensor",
+             "memory_bw": "mem"}
+    def pct(value):
+        return value * 100.0 if value is not None else None
+
+    U_cuda = pct(util["cuda_core"])
+    U_tensor = pct(util["tensor_core"])
+    U_mem = pct(util["memory_bw"])
+    bottle_util = (max(util.values()) if all(v is not None for v in util.values())
+                   else None)
+    U_bottle = pct(bottle_util)
+
+    # per_kernel 明细：一次 native 调用可能启动多个 kernel（MoE 的
+    # gather/gemm/scatter 等）。汇总口径下 bottle_neck_unit 会被便宜的小
+    # kernel 带偏，故逐 kernel 保留 F/B/U，便于按耗时加权或逐 kernel 判瓶颈。
+    # T_us 由采集侧的 do_bench 端到端测得后按 GPU duration 比例拆到各 kernel。
+    per_kernel = _build_per_kernel(agg, tensor_metric)
+
+    result = {
+        # —— 文档口径字段（对齐 参考.md 符号列表）——
+        "F_cuda": flops_cuda,            # F_cuda  (FLOP)
+        "F_tensor": flops_tensor,        # F_tensor(FLOP)
+        "B_mem": mem_bytes,              # B_mem   (Byte)
+        "U_cuda": U_cuda,                # U_cuda  (%)
+        "U_tensor": U_tensor,            # U_tensor(%)
+        "U_mem": U_mem,                  # U_mem   (%)
+        "U_bottle_neck": U_bottle,       # U_bottle_neck (%)
+        "bottle_neck_unit": _unit.get(bottleneck),  # cuda/tensor/mem/None
+        "num_kernels": len(per_kernel),  # NVTX range 内 kernel 数
+        "per_kernel": per_kernel,        # 逐 kernel 明细（多 kernel 算子）
+        # —— 兼容旧字段（同值冗余）——
+        "flops_cuda_core": flops_cuda,
+        "flops_tensor_core": flops_tensor,
+        "memory_bytes": mem_bytes,
+        "util_cuda_core": util["cuda_core"],
+        "util_tensor_core": util["tensor_core"],
+        "util_memory_bw": util["memory_bw"],
+        "bottleneck": bottleneck,
+        "bottleneck_util": bottle_util,
+        "cuda_flops": flops_cuda,
+        "sm_utilization": mean_pct(SM_UTIL),
+        "report_path": report_path,
+    }
+    result['metric_validity'] = _metric_validity(result)
+    for field in ('U_bottle_neck', 'bottleneck_util'):
+        if result[field] is not None:
+            result['metric_validity'][field] = 'derived'
+    if tensor_metric is None:
+        for field in ('F_tensor', 'flops_tensor_core'):
+            result['metric_validity'][field] = 'not_collected'
+    missing = [m for m in metrics if not complete(m)]
+    result.update(ncu_status='partial' if missing else 'collected',
+                  ncu_reason='missing_metrics' if missing else None,
+                  ncu_diagnostic=('Missing/non-numeric metrics: ' + ', '.join(missing)) if missing else None,
+                  ncu_scope='nvtx:kiro_target')
+    return result
 
 
 def _finalize_record(latency_ms, ncu, config=None):
