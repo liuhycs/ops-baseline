@@ -149,3 +149,11 @@ CUDA_VISIBLE_DEVICES= python tools/annotate_baseline_validity.py \
 从独立 checkout 运行。工具要求所有选中算子均有终态，检查残留采集/NCU进程并持有原输出锁，先创建以输入哈希命名的只读原始备份，再在 CPU 上导入已有 NCU 报告；不会执行 export 或 GPU workload。能与具体记录对应的明确 NCU 失败日志标 `failed`，没有报告且缺乏明确证据的标 `unknown` / `legacy_reason_unknown`，不猜测为 `no_kernel`。
 
 原子替换前检查算子/shape/dtype、延迟、输入配置、采集历史及环境元数据保持不变，验证严格 JSON、字段有效性、无运行中的写者，以及原始输入 SHA256 未变。`_metric_validity_migration` 记录工具/parser 版本与哈希、输入哈希、备份路径、时间和状态统计；每条记录保存报告哈希或历史证据。拒绝重复迁移。
+
+## 单独补采与合并
+
+`--ncu-timeout` 设置单次 NCU export 超时（默认 600 秒），与整算子的 `--op-timeout`（默认 1800 秒）独立；该值传给隔离 worker 并纳入续跑配置。定向补采可使用 `--op-timeout 14400 --ncu-timeout 1800`。
+
+`tools/collect_baseline_supplement.py --base BASE --supplement RETRY --output FINAL --ops CSV --devices 0,1,2,3,4,5,6,7` 用上述放宽的默认值单独采集指定算子，等待 BASE 已启动的离线有效性补充结束后，自动合并到一个新的最终 JSON；不重启迁移，也不覆盖两个来源文件。FINAL 旁的 pipeline JSON 记录当前阶段。也可直接使用 `tools/merge_baseline_supplement.py`。
+
+合并保留原先完整成功的记录不变，只添加缺失项或升级不丢失原有实测字段的不完整记录；输入配置不一致则拒绝合并。新增/升级记录保存补采设备与环境来源。原采集历史保持不变，`_supplemental_merge` 记录来源哈希、补采运行信息、有效任务状态与计数及最终 NCU 状态统计；补采失败仍可贡献部分数据，但不能标成成功。

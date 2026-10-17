@@ -20,9 +20,10 @@ with patch.dict(sys.modules, {'torch': SimpleNamespace(), 'triton': SimpleNamesp
 
 
 class NcuValidityTests(unittest.TestCase):
-    def profile(self, export=None, imported=None, csv_text=None, dtype='torch.float16'):
+    def profile(self, export=None, imported=None, csv_text=None, dtype='torch.float16', ncu_timeout=600):
         def run(command, **kwargs):
             if '--export' in command:
+                self.assertEqual(kwargs['timeout'], ncu_timeout)
                 if isinstance(export, Exception):
                     raise export
                 if csv_text is not None:
@@ -32,7 +33,7 @@ class NcuValidityTests(unittest.TestCase):
                 raise imported
             return imported or subprocess.CompletedProcess(command, 0, csv_text, '')
         with tempfile.TemporaryDirectory() as directory, patch.object(c.subprocess, 'run', side_effect=run):
-            result = c.profile_with_ncu('example', 'pass', [8, 8], dtype, directory)
+            result = c.profile_with_ncu('example', 'pass', [8, 8], dtype, directory, ncu_timeout=ncu_timeout)
         return c._finalize_record(.125, result)
 
     def csv(self, missing=None, rows=1):
@@ -123,6 +124,16 @@ class NcuValidityTests(unittest.TestCase):
         record = entry['shapes']['[1]']['torch.float16']
         self.assert_unavailable(record, 'disabled')
         self.assertIsNone(record['num_kernels'])
+
+    def test_custom_ncu_timeout_reaches_export_and_worker(self):
+        self.assertEqual(self.profile(csv_text=self.csv(), ncu_timeout=1800)['ncu_status'], 'collected')
+        with patch.object(c.subprocess, 'run', return_value=SimpleNamespace(returncode=0)) as run:
+            c._spawn_op_worker('abs', True, '/tmp/reports', None, 14400, ncu_timeout=1800)
+        command = run.call_args.args[0]
+        self.assertEqual(command[command.index('--ncu-timeout')+1], '1800')
+        for timeout in (0, -1, float('nan'), float('inf')):
+            with self.assertRaises(ValueError):
+                self.profile(ncu_timeout=timeout)
 
     def test_absent_column_and_missing_duration_are_not_filled(self):
         rows = list(csv.reader(io.StringIO(self.csv(rows=2))))

@@ -485,7 +485,7 @@ def _build_per_kernel(agg, tensor_metric):
 
 
 def profile_with_ncu(op_name, profile_script, shape, dtype_str,
-                     report_dir=None):
+                     report_dir=None, ncu_timeout=600):
     """NCU 分析目标算子，返回三维工作量/利用率/瓶颈。
 
     先 `ncu --export` 存 .ncu-rep（可用 ncu-ui 核对），再 `ncu --import --csv`
@@ -495,6 +495,8 @@ def profile_with_ncu(op_name, profile_script, shape, dtype_str,
     "kiro_target" 供精确采样。shape/dtype_str 仅用于命名报告与选 Tensor Core
     metric。
     """
+    if not math.isfinite(ncu_timeout) or ncu_timeout <= 0:
+        raise ValueError('--ncu-timeout must be finite and positive')
     tensor_metric = FLOP_TENSOR_CORE.get(dtype_str)
     metrics = list(FLOP_CUDA_CORE) + [MEMORY_BYTES, *UTIL.values(), SM_UTIL,
                                       DURATION]
@@ -525,7 +527,7 @@ def profile_with_ncu(op_name, profile_script, shape, dtype_str,
         ]
         try:
             proc = subprocess.run(export_cmd, capture_output=True, text=True,
-                                  timeout=600)
+                                  timeout=ncu_timeout)
         except FileNotFoundError:
             print("  ✗ 未找到 ncu 命令，跳过 NCU profiling")
             return _empty_result(reason='ncu_not_found')
@@ -774,7 +776,7 @@ def _flush_results(results, output_path):
 
 
 def _collect_one_op(op_name, op_cfg, ncu_enabled, report_dir,
-                    results=None, output_path=None):
+                    results=None, output_path=None, ncu_timeout=600):
     """按 yaml 配置采集单个算子；native 解析不到则返回 None（跳过）。
 
     results/output_path 均给出时，每采完一个 shape 就把 results（含本算子已完成
@@ -820,7 +822,7 @@ def _collect_one_op(op_name, op_cfg, ncu_enabled, report_dir,
                 script = _build_profile_script(module, symbol, resolved,
                                                warmup=3)
                 ncu = profile_with_ncu(op_name, script, shape, dtype_str,
-                                       report_dir=report_dir)
+                                       report_dir=report_dir, ncu_timeout=ncu_timeout)
             else:
                 ncu = _empty_result(status="disabled", reason="not_requested")
             per_dtype[dtype_str] = _finalize_record(latency_ms, ncu)
@@ -919,7 +921,7 @@ def _select_ops(discovered, only=None, whitelist=None, blacklist=None):
 
 
 def _collect_one_op_ops(op_module, ncu_enabled, report_dir,
-                        results=None, output_path=None, ops_dir=None):
+                        results=None, output_path=None, ops_dir=None, ncu_timeout=600):
     """采集单个方案B（自定义 ops）算子；native 解析不到则返回 None（跳过）。
 
     results/output_path 均给出时，每采完一个 shape 就把 results（含本算子已完成
@@ -978,7 +980,7 @@ def _collect_one_op_ops(op_module, ncu_enabled, report_dir,
                 script = _build_profile_script_ops(
                     ops_dir, mod_name, binding, dtype_str, warmup=3)
                 ncu = profile_with_ncu(op_name, script, shape, dtype_str,
-                                       report_dir=report_dir)
+                                       report_dir=report_dir, ncu_timeout=ncu_timeout)
             else:
                 ncu = _empty_result(status="disabled", reason="not_requested")
             # config：复杂算子可选导出 config(binding, dtype) 描述真实输入输出
@@ -1000,7 +1002,7 @@ def _collect_one_op_ops(op_module, ncu_enabled, report_dir,
 
 
 def _spawn_op_worker(op_name, ncu_enabled, report_dir, device, op_timeout,
-                     repo=DEFAULT_REPO):
+                     repo=DEFAULT_REPO, ncu_timeout=600):
     """在独立子进程里采集单个算子，返回 (entry_or_None, ok)。
 
     子进程崩溃（如 CUDA 非法访存污染 context）只会杀死它自己，不波及主进程与其余
@@ -1010,7 +1012,8 @@ def _spawn_op_worker(op_name, ncu_enabled, report_dir, device, op_timeout,
     fd, tmp = tempfile.mkstemp(prefix=f"baseline_{op_name}_", suffix=".json")
     os.close(fd)
     cmd = [sys.executable, __file__, "--_worker", "--ops", op_name,
-           "--repo", repo, "--output", tmp, "--report-dir", str(report_dir)]
+           "--repo", repo, "--output", tmp, "--report-dir", str(report_dir),
+           "--ncu-timeout", str(ncu_timeout)]
     if not ncu_enabled:
         cmd.append("--no-ncu")
     if device is not None:
@@ -1164,7 +1167,7 @@ def collect_baseline(output_path, ncu_enabled=True,
                      only=None, whitelist=None, blacklist=None,
                      worker=False, op_timeout=1800,
                      reference_chip=DEFAULT_REFERENCE_CHIP,
-                     repo=DEFAULT_REPO):
+                     repo=DEFAULT_REPO, ncu_timeout=600):
     """采集 baseline 数据并写入 JSON。
 
     采集全部走方案B（ops/ 下的自定义算子模块）。yaml 声明式路径（baseline_shape.yaml
@@ -1215,7 +1218,7 @@ def collect_baseline(output_path, ncu_enabled=True,
         for op_name, op_module in ops_modules:
             _collect_one_op_ops(op_module, ncu_enabled, report_dir,
                                 results=results, output_path=output_path,
-                                ops_dir=ops_dir)
+                                ops_dir=ops_dir, ncu_timeout=ncu_timeout)
         _flush_results(results, output_path)
         return
 
@@ -1229,7 +1232,7 @@ def collect_baseline(output_path, ncu_enabled=True,
         "blacklist": sorted(blacklist) if blacklist is not None else None,
         "selected_ops": [name for name, _ in ops_modules],
         "latency_warmup_ms": 25, "latency_rep_ms": 100,
-        "ncu_warmup_calls": 3,
+        "ncu_warmup_calls": 3, "ncu_timeout_seconds": ncu_timeout,
     })
     _flush_results(results, output_path)
 
@@ -1252,7 +1255,7 @@ def collect_baseline(output_path, ncu_enabled=True,
     failed = []
     for op_name, _ in ops_modules:
         entry, ok = _spawn_op_worker(op_name, ncu_enabled, report_dir,
-                                     device, op_timeout, repo=repo)
+                                     device, op_timeout, repo=repo, ncu_timeout=ncu_timeout)
         if entry is not None:
             results[op_name] = entry
         if not ok:
@@ -1302,6 +1305,8 @@ if __name__ == "__main__":
     parser.add_argument("--op-timeout", type=float, default=1800,
                         help="编排模式下每个算子子进程的超时秒数（防 CUDA 挂起，"
                              "缺省 1800）")
+    parser.add_argument("--ncu-timeout", type=float, default=600,
+                        help="NCU export timeout per shape/dtype, seconds (default 600)")
     parser.add_argument("--reference-chip", default=DEFAULT_REFERENCE_CHIP,
                         help=f"折算系数的分母（基准）芯片，即 baseline 采集所在的卡；"
                              f"须为 hardware_specs.json 中的 chip 名，"
@@ -1315,6 +1320,8 @@ if __name__ == "__main__":
                         help="内部使用：子进程直采模式，在本进程内采集选中算子、"
                              "不再 spawn（由编排模式自动传入，勿手动使用）")
     args = parser.parse_args()
+    if not math.isfinite(args.ncu_timeout) or args.ncu_timeout <= 0:
+        parser.error("--ncu-timeout must be finite and positive")
     if args.devices is not None:
         if args.check or args._worker:
             parser.error("--devices cannot be combined with --check or --_worker")
@@ -1343,6 +1350,6 @@ if __name__ == "__main__":
                      worker=getattr(args, "_worker"),
                      op_timeout=args.op_timeout,
                      reference_chip=args.reference_chip,
-                     repo=args.repo)
+                     repo=args.repo, ncu_timeout=args.ncu_timeout)
 
     sys.exit(exit_code or 0)

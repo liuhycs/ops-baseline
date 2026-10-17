@@ -109,6 +109,20 @@ class CollectionTests(unittest.TestCase):
         names = ['operator_' + str(i) for i in range(100)]
         self.assertEqual(m.name_list(','.join(names)), set(names))
 
+    def test_custom_ncu_timeout_is_forwarded_and_part_of_resume_signature(self):
+        def execute(command, environment, log, timeout, stop):
+            self.assertEqual(command[command.index('--ncu-timeout')+1], '1800')
+            m.atomic_json(command[command.index('--output')+1],
+                          {'abs': {'shapes': {'[1]': {'fp32': {'num_kernels': 1}}}}})
+            return 0
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True):
+            args = self.args(directory, devices='0', ops='abs', ncu_timeout=1800)
+            self.assertEqual(m.collect(args, execute=execute), 0)
+            args.resume = True
+            args.ncu_timeout = 600
+            with self.assertRaisesRegex(ValueError, 'configuration'):
+                m.collect(args, execute=execute)
+
     def test_failed_retry_preserves_partial_measurements_and_artifacts(self):
         for retry_writes_partial in (False, True):
             with self.subTest(retry_writes_partial=retry_writes_partial), \

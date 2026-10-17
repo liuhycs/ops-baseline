@@ -178,6 +178,9 @@ def merge_event(results, origins, name, record, data):
 def _collect(args, *, execute=run_process):
     if not math.isfinite(args.op_timeout) or args.op_timeout <= 0:
         raise ValueError("--op-timeout must be finite and positive")
+    ncu_timeout = getattr(args, "ncu_timeout", 600)
+    if not math.isfinite(ncu_timeout) or ncu_timeout <= 0:
+        raise ValueError("--ncu-timeout must be finite and positive")
     devices = parse_devices(args.devices)
     names = select_operators(args.repo, name_list(args.ops), name_list(args.whitelist),
                              name_list(args.blacklist))
@@ -187,6 +190,7 @@ def _collect(args, *, execute=run_process):
     work = output.with_suffix(output.suffix + '.work')
     signature = {'repo': args.repo, 'operators': names, 'devices': devices,
                  'ncu_enabled': not args.no_ncu, 'op_timeout': args.op_timeout,
+                 'ncu_timeout': ncu_timeout,
                  'reference_chip': args.reference_chip, 'source_sha256': source_digest(args.repo),
                  'report_dir': str(Path(args.report_dir).resolve()) if getattr(args, 'report_dir', None) else None}
     if output.exists() and not args.resume:
@@ -232,7 +236,8 @@ def _collect(args, *, execute=run_process):
                        '--repo', args.repo, '--ops', name, '--output', str(part),
                        '--report-dir', str(report_directory(getattr(args, 'report_dir', None),
                                                           output, name, folder)),
-                       '--op-timeout', str(args.op_timeout), '--reference-chip', args.reference_chip]
+                       '--op-timeout', str(args.op_timeout), '--ncu-timeout', str(ncu_timeout),
+                       '--reference-chip', args.reference_chip]
             if args.no_ncu:
                 command.append('--no-ncu')
             environment = dict(os.environ, CUDA_VISIBLE_DEVICES=device, PYTHONUNBUFFERED='1')
@@ -305,6 +310,7 @@ def main():
     parser.add_argument('--whitelist')
     parser.add_argument('--blacklist')
     parser.add_argument('--op-timeout', type=float, default=1800)
+    parser.add_argument('--ncu-timeout', type=float, default=600)
     parser.add_argument('--reference-chip', default='H800')
     parser.add_argument('--no-ncu', action='store_true')
     parser.add_argument('--resume', action='store_true')

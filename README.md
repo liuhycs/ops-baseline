@@ -173,3 +173,23 @@ field validity, idle processes, and an unchanged source SHA256. Original task
 statuses remain historical. `_metric_validity_migration` records the tool/parser
 version and hashes, input SHA256, backup path, timestamp and status counts; each
 record records its report hash or legacy evidence. A second migration is refused.
+
+## Supplemental collection
+
+`--ncu-timeout` controls each NCU export independently of the whole-operator
+`--op-timeout`; defaults remain 600 s and 1800 s, respectively. The NCU timeout
+is forwarded to isolated workers and recorded in resume settings. For example,
+use `--op-timeout 14400 --ncu-timeout 1800` for a larger targeted retry.
+
+`tools/collect_baseline_supplement.py --base BASE --supplement RETRY --output FINAL
+--ops CSV --devices 0,1,2,3,4,5,6,7` collects the selected operators separately
+with these larger defaults, then waits for BASE's existing offline annotation
+to finish. It does not restart that annotation or overwrite either source.
+It writes a pipeline status beside FINAL and automatically merges into one new
+JSON. `tools/merge_baseline_supplement.py` is also available for an explicit merge.
+Complete base records remain unchanged; a retry may add missing keys or upgrade
+incomplete records only without losing existing measured metric coverage. Input
+configuration mismatches abort merging. New records carry retry device/environment
+provenance. Original task history remains intact; `_supplemental_merge` records
+source hashes, the retry run, effective task statuses/counts and final NCU status
+counts. A failed retry can still contribute partial results, but remains failed.
