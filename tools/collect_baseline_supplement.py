@@ -47,6 +47,14 @@ def run(args):
                 state('failed', error='base annotation has not finished; collection not started')
                 raise TimeoutError('base annotation has not finished; collection not started')
             time.sleep(60)
+        state('waiting_for_gpu_idle')
+        while subprocess.check_output(
+                ['nvidia-smi', '--query-compute-apps=pid', '--format=csv,noheader,nounits'],
+                text=True, timeout=30).strip():
+            if time.monotonic() >= deadline:
+                state('failed', error='GPUs still have compute processes; collection not started')
+                raise TimeoutError('GPUs are not idle')
+            time.sleep(60)
         command = [sys.executable, '-u', str(Path(__file__).with_name('collect_baseline_nvidia.py')),
                    '--repo', args.repo, '--devices', args.devices, '--ops', args.ops,
                    '--op-timeout', str(args.op_timeout), '--ncu-timeout', str(args.ncu_timeout),

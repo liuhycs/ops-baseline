@@ -82,6 +82,7 @@ class MergeTests(unittest.TestCase):
                                    repo='pytorch', devices='0,1,2,3,4,5,6,7', ops='_op',
                                    op_timeout=14400, ncu_timeout=1800, wait_hours=24)
             with patch.object(pipeline.subprocess, 'run', side_effect=collect), \
+                 patch.object(pipeline.subprocess, 'check_output', return_value=''), \
                  patch.object(pipeline.time, 'sleep', side_effect=annotation_finished):
                 pipeline.run(args)
             self.assertEqual(base.read_bytes(), original)
