@@ -21,6 +21,20 @@ with patch.dict(sys.modules, {'collect_baseline_nvidia': c}):
 
 
 class MigrationTests(unittest.TestCase):
+    def test_python_report_api_preserves_missing_counter_and_measured_zero(self):
+        class Metric:
+            def value(self): return 0
+            def unit(self): return 'byte'
+        action = SimpleNamespace(NameBase_DEMANGLED=1, name=lambda mode: 'copy_kernel',
+                                 metric_by_name=lambda name: None if name == c.MEMORY_BYTES else Metric())
+        group = SimpleNamespace(num_actions=lambda: 1, action_by_idx=lambda index: action)
+        context = SimpleNamespace(num_ranges=lambda: 1, range_by_idx=lambda index: group)
+        api = SimpleNamespace(load_report=lambda path: context)
+        result = m.import_python_report('/tmp/report', 'torch.float16', api)
+        self.assertEqual(result['ncu_status'], 'partial')
+        self.assertIsNone(result['B_mem'])
+        self.assertEqual(result['F_cuda'], 0)
+
     def data(self):
         return {'_collection': {'configuration': {'operators': ['_reshape_alias_copy']},
                                 'tasks': {'_reshape_alias_copy': {'status': 'completed'}}},
@@ -105,6 +119,22 @@ class MigrationTests(unittest.TestCase):
                 m.migrate(path, ensure_idle=idle)
             self.assertEqual(path.read_text(), 'new writer data')
             self.assertEqual(len(list(Path(directory).glob('*.pre-validity.*.json'))), 1)
+
+    def test_nonfinite_config_parameters_are_reversibly_encoded(self):
+        data = self.data()
+        old = next(m.records(data))[1]
+        old['config'] = {'inputs': {'args': [float('inf'), -float('inf')]}}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'result.json'
+            raw = json.dumps(data).encode()
+            path.write_bytes(raw)
+            metadata = m.migrate(path, ensure_idle=lambda data: None)
+            result = json.loads(path.read_text())
+            record = next(m.records(result))[1]
+            self.assertEqual(record['T_us'], old['T_us'])
+            self.assertEqual(record['config']['inputs']['args'], [{'__float__': 'inf'}, {'__float__': '-inf'}])
+            self.assertEqual(Path(metadata['backup_path']).read_bytes(), raw)
+            json.dumps(result, allow_nan=False)
 
 
 if __name__ == '__main__':

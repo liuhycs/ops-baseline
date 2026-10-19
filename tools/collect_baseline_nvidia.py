@@ -22,6 +22,10 @@ from pathlib import Path
 
 import torch
 import triton
+try:
+    from .baseline_json import encode_special_floats
+except ImportError:
+    from baseline_json import encode_special_floats
 
 try:
     from .collection_environment import collect_environment
@@ -684,7 +688,7 @@ def _finalize_record(latency_ms, ncu, config=None):
 
     record = {}
     if config is not None:
-        record["config"] = config
+        record["config"] = encode_special_floats(config)
     record["T_us"] = T_us
     record["latency_ms"] = latency_ms
     record.update(ncu)

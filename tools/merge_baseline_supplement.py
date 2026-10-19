@@ -11,6 +11,7 @@ from pathlib import Path
 import tempfile
 import os
 from contextlib import ExitStack
+from baseline_json import encode_special_floats
 
 
 def records(data):
@@ -46,7 +47,7 @@ def merge(base, supplement, origin):
     replaced, added, retained = 0, 0, 0
     for (name, shape, dtype), candidate in records(supplement):
         old = base.get(name, {}).get('shapes', {}).get(shape, {}).get(dtype)
-        if old is not None and old.get('config') != candidate.get('config'):
+        if old is not None and encode_special_floats(old.get('config')) != encode_special_floats(candidate.get('config')):
             raise ValueError(f'input configuration differs: {name} {shape} {dtype}')
         # Never overwrite a complete measured baseline, even if timing differs.
         complete = old is not None and old.get('ncu_status') == 'collected'

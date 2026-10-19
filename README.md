@@ -193,3 +193,15 @@ configuration mismatches abort merging. New records carry retry device/environme
 provenance. Original task history remains intact; `_supplemental_merge` records
 source hashes, the retry run, effective task statuses/counts and final NCU status
 counts. A failed retry can still contribute partial results, but remains failed.
+
+Special floating-point input parameters (for example norm `p=inf`) use reversible
+JSON objects `{"__float__":"inf"}`, `{"__float__":"-inf"}` or `{"__float__":"nan"}`
+in `config`. `tools/baseline_json.py` provides the encoder/decoder; these values
+are input semantics, not missing performance metrics. Missing metrics still use
+null. The original migration backup retains the original bytes.
+
+To avoid launching an NCU process per report during legacy annotation, pass
+`--ncu-python-path /path/to/nsight-compute/extras/python`. This uses NVIDIA's
+[offline Python Report Interface](https://docs.nvidia.com/nsight-compute/PythonReportInterface/index.html)
+with typed metric values (missing values stay null), serialized binding access,
+and the same aggregation parser as CLI imports.

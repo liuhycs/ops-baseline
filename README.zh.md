@@ -157,3 +157,7 @@ CUDA_VISIBLE_DEVICES= python tools/annotate_baseline_validity.py \
 `tools/collect_baseline_supplement.py --base BASE --supplement RETRY --output FINAL --ops CSV --devices 0,1,2,3,4,5,6,7` 先等待 BASE 已启动的离线有效性补充结束（该迁移在替换前会检查容器内有无运行中的采集），再用上述放宽的默认值单独采集指定算子，最后自动合并到一个新的最终 JSON；不重启迁移，也不覆盖两个来源文件。FINAL 旁的 pipeline JSON 记录当前阶段。也可直接使用 `tools/merge_baseline_supplement.py`。
 
 合并保留原先完整成功的记录不变，只添加缺失项或升级不丢失原有实测字段的不完整记录；输入配置不一致则拒绝合并。新增/升级记录保存补采设备与环境来源。原采集历史保持不变，`_supplemental_merge` 记录来源哈希、补采运行信息、有效任务状态与计数及最终 NCU 状态统计；补采失败仍可贡献部分数据，但不能标成成功。
+
+范数 `p=inf` 等合法非有限输入参数，在 `config` 中编码为可还原的 `{"__float__":"inf"}`、`{"__float__":"-inf"}` 或 `{"__float__":"nan"}`。`tools/baseline_json.py` 提供编解码函数；这些是输入语义，不是缺失性能指标（后者仍为 null）。原始迁移备份保留原始字节。
+
+离线迁移可加 `--ncu-python-path /path/to/nsight-compute/extras/python`，通过 NVIDIA 的离线 Python Report Interface 读取报告，避免每份报告启动一个 NCU 进程。采用 typed value，缺失值不转零；串行访问该 binding，聚合仍复用 CLI 的同一 parser。

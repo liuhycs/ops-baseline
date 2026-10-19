@@ -5,11 +5,13 @@ The original bytes are backed up before an in-place, atomic replacement. No
 collection source, task history, latency or environment metadata is rewritten.
 """
 import argparse
+import csv
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import fcntl
 import hashlib
+import io
 import json
 import math
 import os
@@ -18,8 +20,14 @@ import re
 import shlex
 import subprocess
 import tempfile
+import sys
+import threading
 
 import collect_baseline_nvidia as collector
+from baseline_json import encode_special_floats
+
+REPORT_API = None
+REPORT_LOCK = threading.Lock()
 
 
 def records(data):
@@ -58,6 +66,14 @@ def assert_idle(data):
 
 
 def import_report(path, dtype):
+    if REPORT_API is not None:
+        try:
+            # The vendor binding has no documented thread-safety contract.
+            with REPORT_LOCK:
+                return import_python_report(path, dtype, REPORT_API)
+        except Exception as exc:
+            return collector._empty_result(str(path), reason='offline_import_failed',
+                                           diagnostic=f'{type(exc).__name__}: {exc}'[:2000])
     try:
         imported = subprocess.run(
             ['ncu', '--import', str(path), '--csv', '--page', 'raw'],
@@ -71,6 +87,35 @@ def import_report(path, dtype):
         return collector._empty_result(str(path), reason='offline_import_failed',
                                        diagnostic=diagnostic[:2000])
     return collector.parse_ncu_report(imported.stdout, dtype, str(path))
+
+
+def import_python_report(path, dtype, api):
+    """Read raw values via NVIDIA's offline API; never coerce absent metrics to 0."""
+    metrics = [*collector.FLOP_CUDA_CORE, collector.MEMORY_BYTES,
+               *collector.UTIL.values(), collector.SM_UTIL, collector.DURATION]
+    tensor = collector.FLOP_TENSOR_CORE.get(dtype)
+    if tensor:
+        metrics.append(tensor)
+    context = api.load_report(str(path))
+    rows, units = [], [''] * len(metrics)
+    for i in range(context.num_ranges()):
+        group = context.range_by_idx(i)
+        for j in range(group.num_actions()):
+            action = group.action_by_idx(j)
+            values = []
+            for k, metric_name in enumerate(metrics):
+                metric = action.metric_by_name(metric_name)
+                value = metric.value() if metric is not None else None
+                values.append(value if isinstance(value, (int, float)) else '')
+                if metric is not None:
+                    units[k] = metric.unit()
+            rows.append([action.name(action.NameBase_DEMANGLED), *values])
+    text = io.StringIO()
+    writer = csv.writer(text)
+    writer.writerow([collector.KERNEL_NAME_COL, *metrics])
+    writer.writerow(['', *units])
+    writer.writerows(rows)
+    return collector.parse_ncu_report(text.getvalue(), dtype, str(path))
 
 
 def log_evidence(data):
@@ -122,6 +167,8 @@ def annotate_record(item, load_report=import_report, failures=None):
         evidence['report_available'] = False
     result = dict(old)
     result.update(ncu)
+    if 'config' in old:
+        result['config'] = encode_special_floats(old['config'])
     # Finalize kernel time estimates without recomputing either legacy latency field.
     if old.get('latency_ms') is not None:
         result = collector._finalize_record(old['latency_ms'], result)
@@ -143,7 +190,8 @@ def validate(original, annotated):
     for key, old in before.items():
         new = after[key]
         for field in ('T_us', 'latency_ms', 'config'):
-            if (field in old) != (field in new) or old.get(field) != new.get(field):
+            expected = encode_special_floats(old.get(field)) if field == 'config' else old.get(field)
+            if (field in old) != (field in new) or expected != new.get(field):
                 raise ValueError(f'preserved field changed: {key} {field}')
         for field, validity in new['metric_validity'].items():
             if validity in ('unavailable', 'not_collected') and new.get(field) is not None:
@@ -201,7 +249,8 @@ def migrate(path, *, workers=4, load_report=import_report, ensure_idle=assert_id
                     'tool_commit': version, 'tool_sha256': digest(Path(__file__).read_bytes()),
                     'parser_sha256': digest(Path(collector.__file__).read_bytes()),
                     'record_count': len(items), 'ncu_status_counts': dict(counts),
-                    'method': 'offline NCU import; absent legacy evidence classified unknown'}
+                    'method': 'offline NCU Python API' if REPORT_API else 'offline NCU CLI import',
+                    'config_encoding': 'nonfinite float input parameters use {"__float__": "inf"|"-inf"|"nan"}'}
         data['_metric_validity_migration'] = metadata
         temporary = None
         try:
@@ -228,10 +277,16 @@ def migrate(path, *, workers=4, load_report=import_report, ensure_idle=assert_id
 
 
 def main():
+    global REPORT_API
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--input', required=True, help='Finished JSON to back up and atomically annotate in place')
     parser.add_argument('--workers', type=int, default=4, help='CPU-only offline imports (1–8)')
+    parser.add_argument('--ncu-python-path', help='Nsight Compute extras/python directory for fast offline imports')
     args = parser.parse_args()
+    if args.ncu_python_path:
+        sys.path.insert(0, str(Path(args.ncu_python_path).resolve()))
+        import ncu_report
+        REPORT_API = ncu_report
     print(json.dumps(migrate(args.input, workers=args.workers), indent=2), flush=True)
 
 

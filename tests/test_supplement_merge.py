@@ -8,10 +8,10 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 spec = importlib.util.spec_from_file_location('merge', Path(__file__).resolve().parents[1] / 'tools/merge_baseline_supplement.py')
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import collect_baseline_supplement as pipeline
 
 
