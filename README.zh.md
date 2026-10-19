@@ -58,7 +58,7 @@ PyTorch 算子集合来自固定版本的 FlagGems kernelgen-dev，覆盖范围�
 
 | 字段 | 含义 | 单位 |
 |---|---|---|
-| `T_us` | native 调用延迟 T（独立于 NCU）| us |
+| `T_us` | kernel 运行时间 T | us |
 | `F_cuda` / `F_tensor` | CUDA / Tensor Core 实际计算量 | FLOP |
 | `B_mem` | Global Memory 实际访存量 | Byte |
 | `U_cuda` / `U_tensor` / `U_mem` | 三维硬件利用率 | %（0–100）|
@@ -66,29 +66,12 @@ PyTorch 算子集合来自固定版本的 FlagGems kernelgen-dev，覆盖范围�
 | `num_kernels` / `per_kernel` | 一次调用的 kernel 数 / 逐 kernel 明细 | — |
 | `config` | 复杂算子的真实输入输出 shape | — |
 
-另含一组同值冗余的旧字段（`flops_*`、`util_*`、`bottleneck` 等）。NCU 未测得的指标在新旧字段中统一写为 `null`；数值 `0` 只用于实际读到的零值，下游必须支持 nullable 指标。
-
-每条记录增加 `ncu_status`、`ncu_reason`、`ncu_diagnostic`、`ncu_scope` 与 `metric_validity`（字段名 → 有效性）：
-
-| `ncu_status` | 含义 |
-| --- | --- |
-| `collected` | 每个被采样 kernel 的所有已请求 counter 均读取成功。 |
-| `partial` | 有 kernel，但部分 counter 缺失、非数字或非有限数；受影响的汇总字段为 `null`，不返回不完整的部分和。 |
-| `no_kernel` | NCU 成功退出且明确输出 “No kernels were profiled”；仅表示选定 NVTX 范围未采到 kernel，不能据此区分 memcpy、view/no-op 和过滤条件不匹配。 |
-| `failed` | 导出/导入失败、超时，或缺少有效报告/记录且没有明确的无 kernel 证据。 |
-| `disabled` | 本次使用 `--no-ncu`。 |
-| `unknown` | 离线迁移时历史证据不足，无法确定原始 NCU 结果。 |
-
-`metric_validity` 的值包括：`measured`（实测）、`derived`（瓶颈利用率由实测利用率推导）、`estimated`（逐 kernel 的 `T_us` 由端到端延迟分摊）、`not_collected`（该 dtype 没有选定 Tensor Core FLOP counter）、`unavailable`（不可用）。逐 kernel 明细也有自己的有效性映射；多 kernel 缺少可用 duration 权重时不分摊耗时。未请求的 Tensor Core FLOP 为 `null`，不假定为零。
-
-NCU 不可用不影响独立测得的 `T_us` / `latency_ms`。下游应逐记录判断：延迟比较检查 `metric_validity.T_us == "measured"`，利用率统计检查相应字段为 `measured`；禁止用 `record.get("U_mem") or 0` 填补缺失值。不要因为算子级 `profiling_incomplete` 就丢弃该算子的全部记录。保守的任务完整性策略仍将 `no_kernel`、`partial` 和 `failed` 归入 `profiling_incomplete`，这不表示已有延迟和其他实测字段无效。
-
-旧 JSON 没有有效性字段，零值可能是占位值；本次不会自动迁移旧文件，也不能仅凭报告不存在就追认为 `no_kernel`。更新代码不会修改正在运行的采集及其输出。
+另含一组同值冗余的兼容旧字段（`flops_*`、`util_*`、`bottleneck` 等）。
 
 
 输出 JSON 顶层的 `_environment` 保存本次采集的环境信息：实际 GPU 型号、UUID、显存字节数、计算能力、SM 数、CUDA 逻辑设备编号和驱动版本；CPU 信息；操作系统、Python、Torch/Triton/vLLM/SGLang、Torch 构建 CUDA、nvcc 和 NCU 版本；UTC 时间、采集器 Git commit/分支/工作区状态，以及筛选后算子列表与运行参数。`CUDA_VISIBLE_DEVICES` 和 `CUDA_DEVICE_ORDER` 也会记录。无法获取的字段为 `null`，不会因此中断采集。
 
-元数据在首个算子运行前写入，后续增量落盘保留；内部 worker 不重复采集环境。`_scaling_factors.reference_chip` 是配置中的折算基准，实际运行 GPU 请看 `_environment.hardware.gpu`。下游遍历时应按是否具有 `shapes` 对象识别算子；`_reshape_alias_copy` 等算子名也以下划线开头。CPU 记录具体型号、架构、插槽数、物理核心数、逻辑 CPU 数、每核心线程数、NUMA 节点数、进程 CPU 亲和性允许的 CPU 数及虚拟化厂商；拓扑是操作系统可见值，虚拟机中不代表宿主机物理配置，亲和性计数不代表 cgroup CPU 配额。缺少 lscpu 时对应字段为空。驱动兼容 Torch 的裸 UUID，设备查询失败时仅接受全机一致的驱动版本；Triton 优先记录实际导入模块的版本，兼容 pytorch-triton/FlagTree 提供的安装。
+元数据在首个算子运行前写入，后续增量落盘保留；内部 worker 不重复采集环境。`_scaling_factors.reference_chip` 是配置中的折算基准，实际运行 GPU 请看 `_environment.hardware.gpu`。下游应按 `shapes` 对象识别算子条目；真实算子名称也可能以下划线开头。CPU 记录具体型号、架构、插槽数、物理核心数、逻辑 CPU 数、每核心线程数、NUMA 节点数、进程 CPU 亲和性允许的 CPU 数及虚拟化厂商；拓扑是操作系统可见值，虚拟机中不代表宿主机物理配置，亲和性计数不代表 cgroup CPU 配额。缺少 lscpu 时对应字段为空。驱动兼容 Torch 的裸 UUID，设备查询失败时仅接受全机一致的驱动版本；Triton 优先记录实际导入模块的版本，兼容 pytorch-triton/FlagTree 提供的安装。
 
 ## 环境依赖与配置（H800 全量采集）
 
@@ -138,13 +121,3 @@ NCU 未取得 kernel 指标的算子标记 `profiling_incomplete`；这也可能
 证据时才替换。续跑开始前清除终止标记，并记录 `attempt_started_at_utc`。
 协调器或落盘发生异常时先停止消费者，再等待进程清理。自定义 `--report-dir`
 使用完整输出路径的摘要与尝试 ID 隔离，避免不同目录的同名输出互相覆盖报告。
-
-## 单独补采与合并
-
-`--ncu-timeout` 设置单次 NCU export 超时（默认 600 秒），与整算子的 `--op-timeout`（默认 1800 秒）独立；该值传给隔离 worker 并纳入续跑配置。定向补采可使用 `--op-timeout 14400 --ncu-timeout 1800`。
-
-`tools/collect_baseline_supplement.py --base BASE --supplement RETRY --output FINAL --ops CSV --devices 0,1,2,3,4,5,6,7` 先等待 BASE 已启动的离线有效性补充结束（该迁移在替换前会检查容器内有无运行中的采集），再用上述放宽的默认值单独采集指定算子，最后自动合并到一个新的最终 JSON；不重启迁移，也不覆盖两个来源文件。FINAL 旁的 pipeline JSON 记录当前阶段。也可直接使用 `tools/merge_baseline_supplement.py`。
-
-合并保留原先完整成功的记录不变，只添加缺失项或升级不丢失原有实测字段的不完整记录；输入配置不一致则拒绝合并。新增/升级记录保存补采设备与环境来源。原采集历史保持不变，`_supplemental_merge` 记录来源哈希、补采运行信息、有效任务状态与计数及最终 NCU 状态统计；补采失败仍可贡献部分数据，但不能标成成功。
-
-范数 `p=inf` 等合法非有限输入参数，在 `config` 中编码为可还原的 `{"__float__":"inf"}`、`{"__float__":"-inf"}` 或 `{"__float__":"nan"}`。`tools/baseline_json.py` 提供编解码函数；这些是输入语义，不是缺失性能指标（后者仍为 null）。原始迁移备份保留原始字节。

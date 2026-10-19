@@ -112,24 +112,16 @@ def collect(args, *, execute=run_process):
 
 
 def record_quality(entry):
-    """Retain measured fields as well as workload/kernel coverage across retries."""
-    quality = {}
-    for shape, values in entry.get('shapes', {}).items():
-        for dtype, record in values.items():
-            fields = {'T_us'} if record.get('T_us') is not None else set()
-            if record.get('num_kernels'):
-                fields.add('kernels')
-                fields.update(k for k in ('F_cuda', 'F_tensor', 'B_mem', 'U_cuda',
-                                           'U_tensor', 'U_mem', 'sm_utilization')
-                              if record.get(k) is not None)
-            quality[shape, dtype] = fields
-    return quality
+    """Identify measured workloads and whether each has profiler evidence."""
+    return {(shape, dtype): bool(record.get('num_kernels'))
+            for shape, values in entry.get('shapes', {}).items()
+            for dtype, record in values.items()}
 
 
 def covers_previous(previous, current):
     old, new = record_quality(previous), record_quality(current)
-    return old.keys() <= new.keys() and all(fields <= new[key]
-                                           for key, fields in old.items())
+    return old.keys() <= new.keys() and all(not profiled or new[key]
+                                           for key, profiled in old.items())
 
 
 def report_directory(report_root, output, operator, attempt_directory):
@@ -178,9 +170,6 @@ def merge_event(results, origins, name, record, data):
 def _collect(args, *, execute=run_process):
     if not math.isfinite(args.op_timeout) or args.op_timeout <= 0:
         raise ValueError("--op-timeout must be finite and positive")
-    ncu_timeout = getattr(args, "ncu_timeout", 600)
-    if not math.isfinite(ncu_timeout) or ncu_timeout <= 0:
-        raise ValueError("--ncu-timeout must be finite and positive")
     devices = parse_devices(args.devices)
     names = select_operators(args.repo, name_list(args.ops), name_list(args.whitelist),
                              name_list(args.blacklist))
@@ -190,7 +179,6 @@ def _collect(args, *, execute=run_process):
     work = output.with_suffix(output.suffix + '.work')
     signature = {'repo': args.repo, 'operators': names, 'devices': devices,
                  'ncu_enabled': not args.no_ncu, 'op_timeout': args.op_timeout,
-                 'ncu_timeout': ncu_timeout,
                  'reference_chip': args.reference_chip, 'source_sha256': source_digest(args.repo),
                  'report_dir': str(Path(args.report_dir).resolve()) if getattr(args, 'report_dir', None) else None}
     if output.exists() and not args.resume:
@@ -236,8 +224,7 @@ def _collect(args, *, execute=run_process):
                        '--repo', args.repo, '--ops', name, '--output', str(part),
                        '--report-dir', str(report_directory(getattr(args, 'report_dir', None),
                                                           output, name, folder)),
-                       '--op-timeout', str(args.op_timeout), '--ncu-timeout', str(ncu_timeout),
-                       '--reference-chip', args.reference_chip]
+                       '--op-timeout', str(args.op_timeout), '--reference-chip', args.reference_chip]
             if args.no_ncu:
                 command.append('--no-ncu')
             environment = dict(os.environ, CUDA_VISIBLE_DEVICES=device, PYTHONUNBUFFERED='1')
@@ -253,10 +240,7 @@ def _collect(args, *, execute=run_process):
                     records = [r for shape in entry.get('shapes', {}).values() for r in shape.values()]
                     if not records:
                         status = 'skipped'
-                    elif not args.no_ncu and any(
-                            not r.get('num_kernels') or
-                            r.get('ncu_status', 'collected') != 'collected'
-                            for r in records):
+                    elif not args.no_ncu and any(not r.get('num_kernels') for r in records):
                         status = 'profiling_incomplete'
                 record = {'status': status, 'device': device, 'returncode': code,
                           'log': str(folder / 'collector.log'), 'result': str(part)}
@@ -310,7 +294,6 @@ def main():
     parser.add_argument('--whitelist')
     parser.add_argument('--blacklist')
     parser.add_argument('--op-timeout', type=float, default=1800)
-    parser.add_argument('--ncu-timeout', type=float, default=600)
     parser.add_argument('--reference-chip', default='H800')
     parser.add_argument('--no-ncu', action='store_true')
     parser.add_argument('--resume', action='store_true')
