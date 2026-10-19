@@ -139,17 +139,6 @@ NCU 未取得 kernel 指标的算子标记 `profiling_incomplete`；这也可能
 协调器或落盘发生异常时先停止消费者，再等待进程清理。自定义 `--report-dir`
 使用完整输出路径的摘要与尝试 ID 隔离，避免不同目录的同名输出互相覆盖报告。
 
-## 已结束采集的离线有效性补充
-
-```bash
-CUDA_VISIBLE_DEVICES= python tools/annotate_baseline_validity.py \
-  --input /absolute/path/to/finished.json --workers 4
-```
-
-从独立 checkout 运行。工具要求所有选中算子均有终态，检查残留采集/NCU进程并持有原输出锁，先创建以输入哈希命名的只读原始备份，再在 CPU 上导入已有 NCU 报告；不会执行 export 或 GPU workload。能与具体记录对应的明确 NCU 失败日志标 `failed`，没有报告且缺乏明确证据的标 `unknown` / `legacy_reason_unknown`，不猜测为 `no_kernel`。
-
-原子替换前检查算子/shape/dtype、延迟、输入配置、采集历史及环境元数据保持不变，验证严格 JSON、字段有效性、无运行中的写者，以及原始输入 SHA256 未变。`_metric_validity_migration` 记录工具/parser 版本与哈希、输入哈希、备份路径、时间和状态统计；每条记录保存报告哈希或历史证据。拒绝重复迁移。
-
 ## 单独补采与合并
 
 `--ncu-timeout` 设置单次 NCU export 超时（默认 600 秒），与整算子的 `--op-timeout`（默认 1800 秒）独立；该值传给隔离 worker 并纳入续跑配置。定向补采可使用 `--op-timeout 14400 --ncu-timeout 1800`。
@@ -159,5 +148,3 @@ CUDA_VISIBLE_DEVICES= python tools/annotate_baseline_validity.py \
 合并保留原先完整成功的记录不变，只添加缺失项或升级不丢失原有实测字段的不完整记录；输入配置不一致则拒绝合并。新增/升级记录保存补采设备与环境来源。原采集历史保持不变，`_supplemental_merge` 记录来源哈希、补采运行信息、有效任务状态与计数及最终 NCU 状态统计；补采失败仍可贡献部分数据，但不能标成成功。
 
 范数 `p=inf` 等合法非有限输入参数，在 `config` 中编码为可还原的 `{"__float__":"inf"}`、`{"__float__":"-inf"}` 或 `{"__float__":"nan"}`。`tools/baseline_json.py` 提供编解码函数；这些是输入语义，不是缺失性能指标（后者仍为 null）。原始迁移备份保留原始字节。
-
-离线迁移可加 `--ncu-python-path /path/to/nsight-compute/extras/python`，通过 NVIDIA 的离线 Python Report Interface 读取报告，避免每份报告启动一个 NCU 进程。采用 typed value，缺失值不转零；串行访问该 binding，聚合仍复用 CLI 的同一 parser。
