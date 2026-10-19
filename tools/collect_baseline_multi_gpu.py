@@ -221,6 +221,7 @@ def _collect(args, *, execute=run_process):
             folder.mkdir(parents=True, exist_ok=True)
             part = folder / 'result.json'
             command = [sys.executable, str(ROOT / 'tools' / 'collect_baseline_nvidia.py'),
+                       '--_task-exit-status',
                        '--repo', args.repo, '--ops', name, '--output', str(part),
                        '--report-dir', str(report_directory(getattr(args, 'report_dir', None),
                                                           output, name, folder)),

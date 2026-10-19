@@ -1,7 +1,12 @@
 # Copyright 2026 FlagOS Contributors
 # SPDX-License-Identifier: Apache-2.0
 """Exercise scheduling and recovery without CUDA or torch imports."""
+import argparse
+import ast
 import importlib.util
+import io
+import sys
+from contextlib import redirect_stdout
 import json
 import os
 from pathlib import Path
@@ -69,6 +74,7 @@ class CollectionTests(unittest.TestCase):
         def execute(command, environment, log, timeout, stop):
             name = command[command.index('--ops')+1]
             out = command[command.index('--output')+1]
+            self.assertIn('--_task-exit-status', command)
             if name == 'mul':
                 return 'timeout'
             m.atomic_json(out, {name: {'shapes': {'[1]': {'fp32': {'num_kernels': 0}}}}})
@@ -80,6 +86,46 @@ class CollectionTests(unittest.TestCase):
             self.assertEqual(tasks['abs']['status'], 'failed')
             self.assertEqual(tasks['add']['status'], 'profiling_incomplete')
             self.assertEqual(tasks['mul']['returncode'], 'timeout')
+
+    def test_legacy_and_internal_worker_failure_exit_status(self):
+        # Execute the actual collector function and CLI without importing CUDA
+        # dependencies; only the hardware probe and worker execution are mocked.
+        tree = ast.parse((m.ROOT / 'tools/collect_baseline_nvidia.py').read_text())
+        function = next(n for n in tree.body if isinstance(n, ast.FunctionDef)
+                        and n.name == 'collect_baseline')
+        cli = tree.body[-1]
+        partial = {'shapes': {'[1]': {'fp32': {'num_kernels': 1}}}}
+        for ok in (False, True):
+            for internal in (False, True):
+                with self.subTest(ok=ok, internal=internal), \
+                     tempfile.TemporaryDirectory() as directory, redirect_stdout(io.StringIO()):
+                    output = Path(directory) / 'data.json'
+                    environment = dict(
+                        __name__='__main__', argparse=argparse, sys=sys, os=os, Path=Path,
+                        DEFAULT_REPO='pytorch', DEFAULT_REFERENCE_CHIP='H800',
+                        torch=SimpleNamespace(cuda=SimpleNamespace(
+                            is_available=lambda: True, get_device_name=lambda: 'NVIDIA test')),
+                        ops_dir_for=lambda repo: Path(directory),
+                        _discover_ops=lambda path: [('abs', None)],
+                        _select_ops=lambda modules, **kwargs: modules,
+                        _parse_name_list=lambda value: None,
+                        collect_environment=lambda *args: {},
+                        build_scaling_factors=lambda **kwargs: {'_error': 'unused'},
+                        _spawn_op_worker=lambda *args, **kwargs: (partial, ok),
+                    )
+                    # Collector flush takes (results, path), unlike atomic_json.
+                    environment['_flush_results'] = lambda data, path: m.atomic_json(path, data)
+                    exec(compile(ast.Module(body=[function], type_ignores=[]), '<collector>', 'exec'),
+                         environment)
+                    self.assertIsNone(environment['collect_baseline'](output))
+                    argv = ['collector', '--output', str(output)]
+                    if internal:
+                        argv.append('--_task-exit-status')
+                    with patch.object(sys, 'argv', argv), self.assertRaises(SystemExit) as raised:
+                        exec(compile(ast.Module(body=[cli], type_ignores=[]), '<cli>', 'exec'),
+                             environment)
+                    self.assertEqual(raised.exception.code, int(internal and not ok))
+                    self.assertEqual(json.loads(output.read_text())['abs'], partial)
 
     def test_device_and_operator_validation(self):
         with patch.dict(os.environ, {'CUDA_VISIBLE_DEVICES': '2,5'}, clear=True):

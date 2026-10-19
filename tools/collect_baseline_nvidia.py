@@ -1092,7 +1092,7 @@ def collect_baseline(output_path, ncu_enabled=True,
                      only=None, whitelist=None, blacklist=None,
                      worker=False, op_timeout=1800,
                      reference_chip=DEFAULT_REFERENCE_CHIP,
-                     repo=DEFAULT_REPO):
+                     repo=DEFAULT_REPO, task_exit_status=False):
     """采集 baseline 数据并写入 JSON。
 
     采集全部走方案B（ops/ 下的自定义算子模块）。yaml 声明式路径（baseline_shape.yaml
@@ -1109,6 +1109,7 @@ def collect_baseline(output_path, ncu_enabled=True,
     only/whitelist/blacklist：算子名集合（None 表示不设限）。见 _select_ops：
     only 与 whitelist 取交集后再减去 blacklist。
     op_timeout：编排模式下每个算子子进程的超时秒数（防 CUDA 挂起卡死整轮）。
+    task_exit_status：仅供多卡内部任务返回 0/1；默认保留原有 None 返回值。
 
     reference_chip：折算系数的分母芯片（baseline 就是在这颗卡上采的），缺省 H800。
     由 --reference-chip 传入，换基线芯片时无需改代码。
@@ -1196,7 +1197,8 @@ def collect_baseline(output_path, ncu_enabled=True,
     if failed:
         print(f"⚠ {len(failed)} 个算子子进程异常（已跳过，部分结果若有则保留）: "
               f"{', '.join(failed)}")
-    return 1 if failed else 0
+    if task_exit_status:
+        return 1 if failed else 0
 
 
 if __name__ == "__main__":
@@ -1242,6 +1244,8 @@ if __name__ == "__main__":
     parser.add_argument("--_worker", action="store_true",
                         help="内部使用：子进程直采模式，在本进程内采集选中算子、"
                              "不再 spawn（由编排模式自动传入，勿手动使用）")
+    parser.add_argument("--_task-exit-status", action="store_true",
+                        help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.devices is not None:
         if args.check or args._worker:
@@ -1271,6 +1275,6 @@ if __name__ == "__main__":
                      worker=getattr(args, "_worker"),
                      op_timeout=args.op_timeout,
                      reference_chip=args.reference_chip,
-                     repo=args.repo)
+                     repo=args.repo, task_exit_status=args._task_exit_status)
 
     sys.exit(exit_code or 0)
