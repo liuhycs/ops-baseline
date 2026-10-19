@@ -81,3 +81,40 @@ To run as many operators as possible on H800, beyond the base dependencies (CUDA
 | **Ascend / Hygon vendor-specific ops** | `group_list_cumsum`, `indexer_epilogue`, `lightning_indexer`, `kv_rmsnorm_rope_cache`, `sparse_attn_sharedkv`, `int8_einsum`, `fused_inv_rope_int8_quant`, etc. | No NV-native kernel exists on H800; `native()` honestly returns None and the op is skipped | Cannot be collected on H800 — expected skip (their acceptance data comes from Ascend/Hygon) |
 
 Note: skipped operators do not affect the rest (each op runs in an isolated subprocess). `fused_marlin_moe_w4a16_int4` quantizes per-expert in pure Python (slow); it keeps the full 32-shape grid matching the benchmark, so large-E architectures may approach `--op-timeout` (default 1800s) — raise it or `--blacklist` the largest shapes if a subprocess times out. The FLA ops (`chunk_gated_delta_rule_fwd`, `chunk_kda`) and `fused_q_kv_rmsnorm` resolve `native()` via multi-candidate fallback, compatible with different vllm layouts (`vllm.model_executor.layers.fla` / `vllm.third_party.flash_linear_attention`).
+
+## Multi-GPU collection
+
+```bash
+python tools/collect_baseline_nvidia.py --repo pytorch \
+  --devices 0,1,2,3,4,5,6,7 --output pytorch_h800.json
+# Repeat the same command with --resume to skip completed operators.
+```
+
+`--devices` and `--device` are mutually exclusive. Each selected visibility token
+(index or UUID) gets one consumer of a shared operator queue. Inherited
+`CUDA_VISIBLE_DEVICES` restricts the accepted tokens; indices are not remapped.
+Tasks retain process isolation; cancellation/timeout kills their process group,
+including NCU descendants. Each operator has separate logs and NCU reports.
+
+The final deliverable is **one JSON**, atomically updated by the coordinator.
+Operator records and `_scaling_factors` retain their format. `_environment` is
+one representative task environment; `_environments` records environments per
+GPU and `_collection.tasks` records assignments and outcomes. Internal partial
+files, logs and reports live in `<output>.work/`; no manual merging is needed.
+NCU records without kernels are marked `profiling_incomplete`, including host or
+view operations that may legitimately launch no kernel. Inspect logs rather
+than interpreting absent metrics as measured zeros. Non-completed tasks produce
+exit code 1 without discarding collected data. Resume requires matching source,
+operator selection, devices and settings. Use idle GPUs and verify profiling
+concurrency on the installed driver/NCU version before a large run.
+
+Retries use separate attempt directories, preserving previous logs, partial JSON
+and NCU reports. A failed retry cannot remove or downgrade the retained operator
+snapshot; the latest task includes `retained_result` provenance when older data
+is used, and `previous_attempts` records earlier outcomes. Snapshots from different
+attempts are not merged workload-by-workload. A new snapshot replaces the old one
+only when it retains every existing workload and its profiler evidence.
+Resume clears terminal flags before work begins and records `attempt_started_at_utc`.
+Coordinator/checkpoint failures stop consumers before waiting for process cleanup.
+Custom `--report-dir` paths include a digest of the full output path and an attempt
+ID, so identically named outputs in separate directories do not overwrite reports.
